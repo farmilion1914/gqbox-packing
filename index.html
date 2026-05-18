@@ -89,9 +89,6 @@
         #locationModalOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
         #locationModalOverlay > div { background: white; border-radius: 32px; padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
         .loading-spinner { text-align: center; padding: 40px; color: #5b6f86; }
-        .sync-status { font-size: 0.7rem; display: flex; align-items: center; gap: 5px; }
-        .online-indicator { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; display: inline-block; }
-        .offline-indicator { background: #f44336; }
     </style>
 </head>
 <body>
@@ -140,24 +137,32 @@
 
     // ======================== РАБОТА С FIREBASE ========================
     
+    async function createInitialEmployees() {
+        console.log('СОЗДАЮ НАЧАЛЬНЫХ СОТРУДНИКОВ...');
+        const initial = [
+            { login: 'safonova', password: 'admin0111', name: 'Сафонова Е.', role: 'admin' },
+            { login: 'alla', password: 'alla123', name: 'Алла', role: 'packer' },
+            { login: 'zuhra', password: 'zuhra123', name: 'Зухра', role: 'packer' },
+            { login: 'galya', password: 'galya123', name: 'Галя', role: 'packer' }
+        ];
+        for (const emp of initial) {
+            await db.collection('employees').add(emp);
+        }
+        console.log('НАЧАЛЬНЫЕ СОТРУДНИКИ СОЗДАНЫ!');
+    }
+
     async function getEmployees() {
         try {
             const snap = await db.collection('employees').orderBy('name').get();
             let employees = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            console.log('Сотрудников в базе:', employees.length);
             
             if (employees.length === 0) {
-                console.log('Создаю начальных сотрудников...');
-                const initial = [
-                    { login: 'safonova', password: 'admin0111', name: 'Сафонова Е.', role: 'admin' },
-                    { login: 'alla', password: 'alla123', name: 'Алла', role: 'packer' },
-                    { login: 'zuhra', password: 'zuhra123', name: 'Зухра', role: 'packer' },
-                    { login: 'galya', password: 'galya123', name: 'Галя', role: 'packer' }
-                ];
-                for (const emp of initial) {
-                    await db.collection('employees').add(emp);
-                }
+                console.log('База пустая — создаю начальных сотрудников');
+                await createInitialEmployees();
                 const snap2 = await db.collection('employees').orderBy('name').get();
                 employees = snap2.docs.map(d => ({ id: d.id, ...d.data() }));
+                console.log('После создания:', employees.length);
             }
             return employees;
         } catch (error) {
@@ -168,14 +173,35 @@
 
     async function loginUser(loginName, password) {
         try {
-            console.log('Попытка входа:', loginName);
+            console.log('Попытка входа:', loginName, 'пароль:', password);
+            
+            // Сначала проверяем, есть ли вообще сотрудники
+            const allSnap = await db.collection('employees').get();
+            console.log('Всего документов в employees:', allSnap.size);
+            
+            if (allSnap.empty) {
+                console.log('База пустая — создаю начальных сотрудников перед входом');
+                await createInitialEmployees();
+            }
+            
             const snap = await db.collection('employees')
                 .where('login', '==', loginName)
                 .where('password', '==', password)
                 .get();
-            console.log('Найдено записей:', snap.size);
-            if (snap.empty) return null;
+            
+            console.log('Найдено записей по логину/паролю:', snap.size);
+            
+            if (snap.empty) {
+                // Выведем всех сотрудников для отладки
+                const debugSnap = await db.collection('employees').get();
+                debugSnap.docs.forEach(d => {
+                    console.log('Сотрудник в базе:', d.data().login, '/', d.data().password);
+                });
+                return null;
+            }
+            
             const doc = snap.docs[0];
+            console.log('ВХОД УСПЕШЕН:', doc.data().name);
             return { id: doc.id, ...doc.data() };
         } catch (error) {
             console.error('Ошибка входа:', error);
@@ -183,6 +209,7 @@
         }
     }
 
+    // Остальные функции без изменений...
     async function registerPacker(login, password, name) {
         if (!login || !password || !name) return { success: false, error: 'Заполните все поля' };
         try {
@@ -301,14 +328,12 @@
     function getSession() { const raw = localStorage.getItem(SESSION_KEY); return raw ? JSON.parse(raw) : null; }
     function clearSession() { localStorage.removeItem(SESSION_KEY); }
 
-    // ======================== ВСПОМОГАТЕЛЬНЫЕ ========================
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]));
     }
     function isCrossdockStore(storeName) { return OZON_STORES.crossdock.includes(storeName); }
 
-    // ======================== МОДАЛЬНОЕ ОКНО ========================
     function showLocationModal(userId, userName, onSave) {
         const modalHtml = `<div id="locationModalOverlay"><div>
             <h3 style="margin-bottom:20px;">📍 Выбор склада / города</h3>
@@ -359,8 +384,6 @@
         document.getElementById("modalCancelBtn").onclick = () => document.getElementById("locationModalOverlay")?.remove();
     }
 
-    // ======================== РЕНДЕРИНГ ========================
-    
     function renderLogin() {
         return `<div class="app-container"><div class="glass-card" style="max-width:500px;margin:0 auto;">
             <div class="logo-container"><div class="logo-oval"><span class="logo-text">GQ box</span></div></div>
@@ -378,7 +401,7 @@
             <div id="regError" class="error-msg" style="display:none;margin-top:12px;"></div>
             <div style="background:#f8fafd;border-radius:24px;padding:12px;margin-top:20px;font-size:12px;text-align:center;">
                 <strong>👑 Админ:</strong> safonova / admin0111<br>
-                <strong>📦 Упаковщицы:</strong> alla, zuhra, galya
+                <strong>📦 Упаковщицы:</strong> alla / alla123, zuhra / zuhra123, galya / galya123
             </div>
         </div></div>`;
     }

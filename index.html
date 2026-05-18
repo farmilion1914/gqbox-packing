@@ -149,6 +149,8 @@
             await db.collection('employees').add(emp);
         }
         console.log('НАЧАЛЬНЫЕ СОТРУДНИКИ СОЗДАНЫ!');
+        // Ждём 1 секунду, чтобы Firebase сохранил данные
+        await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     async function getEmployees() {
@@ -175,7 +177,7 @@
         try {
             console.log('Попытка входа:', loginName, 'пароль:', password);
             
-            // Сначала проверяем, есть ли вообще сотрудники
+            // ПРОВЕРЯЕМ И СОЗДАЁМ СОТРУДНИКОВ ПЕРЕД ВХОДОМ
             const allSnap = await db.collection('employees').get();
             console.log('Всего документов в employees:', allSnap.size);
             
@@ -184,6 +186,7 @@
                 await createInitialEmployees();
             }
             
+            // Теперь ищем пользователя
             const snap = await db.collection('employees')
                 .where('login', '==', loginName)
                 .where('password', '==', password)
@@ -194,8 +197,9 @@
             if (snap.empty) {
                 // Выведем всех сотрудников для отладки
                 const debugSnap = await db.collection('employees').get();
+                console.log('Сотрудники в базе:');
                 debugSnap.docs.forEach(d => {
-                    console.log('Сотрудник в базе:', d.data().login, '/', d.data().password);
+                    console.log(' -', d.data().login, '/', d.data().password, '/', d.data().name);
                 });
                 return null;
             }
@@ -209,7 +213,6 @@
         }
     }
 
-    // Остальные функции без изменений...
     async function registerPacker(login, password, name) {
         if (!login || !password || !name) return { success: false, error: 'Заполните все поля' };
         try {

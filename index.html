@@ -115,15 +115,9 @@
         measurementId: "G-KJSR3NESZM"
     };
 
-    // Инициализация Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    
-    // Включаем офлайн-режим
-    db.enablePersistence().catch(function(err) {
-        console.warn('Офлайн-режим:', err.message);
-    });
-    
+    db.enablePersistence().catch(function(err) { console.warn('Офлайн-режим:', err.message); });
     console.log("Firebase Firestore инициализирован для проекта packing23-11afd");
 </script>
 
@@ -154,7 +148,7 @@
             if (employees.length === 0) {
                 console.log('Создаю начальных сотрудников...');
                 const initial = [
-                    { login: 'safonova', password: 'admin123', name: 'Сафонова Е.', role: 'admin' },
+                    { login: 'safonova', password: 'admin0111', name: 'Сафонова Е.', role: 'admin' },
                     { login: 'alla', password: 'alla123', name: 'Алла', role: 'packer' },
                     { login: 'zuhra', password: 'zuhra123', name: 'Зухра', role: 'packer' },
                     { login: 'galya', password: 'galya123', name: 'Галя', role: 'packer' }
@@ -179,9 +173,7 @@
                 .where('login', '==', loginName)
                 .where('password', '==', password)
                 .get();
-            
             console.log('Найдено записей:', snap.size);
-            
             if (snap.empty) return null;
             const doc = snap.docs[0];
             return { id: doc.id, ...doc.data() };
@@ -193,16 +185,11 @@
 
     async function registerPacker(login, password, name) {
         if (!login || !password || !name) return { success: false, error: 'Заполните все поля' };
-        
         try {
             const snap = await db.collection('employees').where('login', '==', login).get();
             if (!snap.empty) return { success: false, error: 'Логин уже существует' };
-            
             await db.collection('employees').add({
-                login: login.trim(),
-                password: password,
-                name: name.trim(),
-                role: 'packer'
+                login: login.trim(), password: password, name: name.trim(), role: 'packer'
             });
             return { success: true };
         } catch (error) {
@@ -214,7 +201,6 @@
     async function deleteUser(userId) {
         const userDoc = await db.collection('employees').doc(userId).get();
         if (!userDoc.exists || userDoc.data().role === 'admin') return false;
-        
         const batch = db.batch();
         const records = await db.collection('pack_records').where('userId', '==', userId).get();
         records.docs.forEach(d => batch.delete(d.ref));
@@ -233,31 +219,22 @@
     async function saveUserLocation(userId, marketplace, locationDisplay, locationRaw) {
         const snap = await db.collection('user_locations').where('userId', '==', userId).get();
         const data = { userId, marketplace, locationDisplay, locationRaw, timestamp: Date.now() };
-        if (snap.empty) {
-            await db.collection('user_locations').add(data);
-        } else {
-            await db.collection('user_locations').doc(snap.docs[0].id).update(data);
-        }
+        if (snap.empty) { await db.collection('user_locations').add(data); }
+        else { await db.collection('user_locations').doc(snap.docs[0].id).update(data); }
     }
 
     async function addRecord(article, quantity, userId, userName, marketplace, locationDisplay, locationRaw) {
-        if (!article || !marketplace || !locationDisplay) {
-            return { success: false, error: 'Заполните все поля' };
-        }
+        if (!article || !marketplace || !locationDisplay) return { success: false, error: 'Заполните все поля' };
         const qty = parseInt(quantity);
         if (isNaN(qty) || qty <= 0) return { success: false, error: 'Количество > 0' };
-        
         const todayStr = getTodayStr();
-        const todayRecords = await db.collection('pack_records')
-            .where('userId', '==', userId).where('dateOnly', '==', todayStr).get();
+        const todayRecords = await db.collection('pack_records').where('userId', '==', userId).where('dateOnly', '==', todayStr).get();
         const alreadyToday = todayRecords.docs.reduce((sum, d) => sum + d.data().quantity, 0);
-        
         let earned = 0, remaining = qty, currentQty = alreadyToday;
         const tiers = [
             { limit: 1000, rate: 2.5 }, { limit: 2000, rate: 2.75 },
             { limit: 3000, rate: 3.0 }, { limit: Infinity, rate: 3.25 }
         ];
-        
         for (const tier of tiers) {
             if (remaining <= 0) break;
             if (currentQty >= tier.limit) continue;
@@ -267,7 +244,6 @@
             remaining -= take;
             currentQty += take;
         }
-        
         await db.collection('pack_records').add({
             userId, userName, article: article.trim().toUpperCase(),
             quantity: qty, earned, marketplace, locationDisplay,
@@ -279,15 +255,12 @@
     }
 
     async function getUserRecords(userId) {
-        const snap = await db.collection('pack_records')
-            .where('userId', '==', userId).orderBy('timestamp', 'desc').get();
+        const snap = await db.collection('pack_records').where('userId', '==', userId).orderBy('timestamp', 'desc').get();
         return snap.docs.map(d => ({ id: d.id, ...d.data() }));
     }
 
     async function getUserDayRecords(userId, dateStr) {
-        const snap = await db.collection('pack_records')
-            .where('userId', '==', userId).where('dateOnly', '==', dateStr)
-            .orderBy('timestamp', 'desc').get();
+        const snap = await db.collection('pack_records').where('userId', '==', userId).where('dateOnly', '==', dateStr).orderBy('timestamp', 'desc').get();
         return snap.docs.map(d => ({ id: d.id, ...d.data() }));
     }
 
@@ -308,15 +281,11 @@
             const ts = r.timestamp.toDate ? r.timestamp.toDate() : new Date(r.timestamp);
             return ts >= startDate;
         });
-        return {
-            totalQty: filtered.reduce((s,r) => s + r.quantity, 0),
-            totalEarned: filtered.reduce((s,r) => s + (r.earned || 0), 0)
-        };
+        return { totalQty: filtered.reduce((s,r) => s + r.quantity, 0), totalEarned: filtered.reduce((s,r) => s + (r.earned || 0), 0) };
     }
 
     async function getYesterdayRecords() {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
         const yyyymmdd = yesterday.toISOString().slice(0,10);
         const snap = await db.collection('pack_records').where('dateOnly', '==', yyyymmdd).get();
         return { records: snap.docs.map(d => ({ id: d.id, ...d.data() })), date: yyyymmdd };
@@ -343,46 +312,29 @@
     function showLocationModal(userId, userName, onSave) {
         const modalHtml = `<div id="locationModalOverlay"><div>
             <h3 style="margin-bottom:20px;">📍 Выбор склада / города</h3>
-            <div class="input-field" style="margin-bottom:16px;">
-                <label>🛍️ Маркетплейс</label>
-                <select id="modalMarketplace">
-                    <option value="WB">Wildberries (WB)</option>
-                    <option value="OZON">OZON</option>
-                </select>
-            </div>
+            <div class="input-field" style="margin-bottom:16px;"><label>🛍️ Маркетплейс</label>
+            <select id="modalMarketplace"><option value="WB">Wildberries (WB)</option><option value="OZON">OZON</option></select></div>
             <div id="modalLocationContainer"></div>
             <div style="display:flex;gap:12px;margin-top:24px;">
                 <button id="modalSaveBtn" style="flex:1;">✅ Сохранить</button>
-                <button id="modalCancelBtn" style="flex:1;background:#b0bed0;">Отмена</button>
-            </div>
-        </div></div>`;
-        
+                <button id="modalCancelBtn" style="flex:1;background:#b0bed0;">Отмена</button></div></div></div>`;
         document.body.insertAdjacentHTML('beforeend', modalHtml);
-        
         const updateModalLocation = () => {
             const mp = document.getElementById("modalMarketplace").value;
             const container = document.getElementById("modalLocationContainer");
             if (mp === 'WB') {
-                container.innerHTML = `<div class="input-field"><label>📍 Город (склад WB)</label>
-                    <select id="modalWBCitySelect"><option value="">-- Выберите город --</option>${WB_CITIES.map(c => `<option value="${c}">${c}</option>`).join('')}</select>
-                    <input type="text" id="modalWBCityManual" placeholder="Или введите город вручную" style="margin-top:8px;"></div>`;
+                container.innerHTML = `<div class="input-field"><label>📍 Город (склад WB)</label><select id="modalWBCitySelect"><option value="">-- Выберите город --</option>${WB_CITIES.map(c => `<option value="${c}">${c}</option>`).join('')}</select><input type="text" id="modalWBCityManual" placeholder="Или введите город вручную" style="margin-top:8px;"></div>`;
                 const sel = document.getElementById("modalWBCitySelect"), man = document.getElementById("modalWBCityManual");
                 if(sel && man){ sel.onchange = () => { if(sel.value) man.value = sel.value; }; man.oninput = () => { if(man.value) sel.value = ""; }; }
             } else {
-                container.innerHTML = `<div class="input-field"><label>🏭 Склад OZON</label>
-                    <select id="modalOzonWarehouseSelect"><option value="">-- Выберите склад --</option>${ALL_OZON_STORES.map(s => `<option value="${s}">${s}</option>`).join('')}</select>
-                    <div id="modalOzonTargetBlock" style="margin-top:12px;display:none;"><label>📦 Город назначения</label>
-                        <select id="modalOzonTargetSelect"><option value="">-- Выберите --</option><option value="Екатеринбург">Екатеринбург</option><option value="Челябинск">Челябинск</option><option value="Тюмень">Тюмень</option><option value="Казань">Казань</option><option value="Новосибирск">Новосибирск</option></select>
-                        <input type="text" id="modalOzonTargetManual" placeholder="Или введите вручную" style="margin-top:8px;"></div></div>`;
+                container.innerHTML = `<div class="input-field"><label>🏭 Склад OZON</label><select id="modalOzonWarehouseSelect"><option value="">-- Выберите склад --</option>${ALL_OZON_STORES.map(s => `<option value="${s}">${s}</option>`).join('')}</select><div id="modalOzonTargetBlock" style="margin-top:12px;display:none;"><label>📦 Город назначения</label><select id="modalOzonTargetSelect"><option value="">-- Выберите --</option><option value="Екатеринбург">Екатеринбург</option><option value="Челябинск">Челябинск</option><option value="Тюмень">Тюмень</option><option value="Казань">Казань</option><option value="Новосибирск">Новосибирск</option></select><input type="text" id="modalOzonTargetManual" placeholder="Или введите вручную" style="margin-top:8px;"></div></div>`;
                 const ws = document.getElementById("modalOzonWarehouseSelect"), tb = document.getElementById("modalOzonTargetBlock");
                 const upd = () => { tb.style.display = (ws.value && isCrossdockStore(ws.value)) ? 'block' : 'none'; };
                 ws.onchange = upd; upd();
             }
         };
-        
         document.getElementById("modalMarketplace").addEventListener("change", updateModalLocation);
         updateModalLocation();
-        
         document.getElementById("modalSaveBtn").onclick = async () => {
             const mp = document.getElementById("modalMarketplace").value;
             let locationDisplay = "", locationRaw = "";
@@ -425,7 +377,7 @@
             <button id="doRegister" style="width:100%;margin-top:12px;background:#4a7c59;">📝 Зарегистрироваться</button>
             <div id="regError" class="error-msg" style="display:none;margin-top:12px;"></div>
             <div style="background:#f8fafd;border-radius:24px;padding:12px;margin-top:20px;font-size:12px;text-align:center;">
-                <strong>👑 Админ:</strong> safonova / admin123<br>
+                <strong>👑 Админ:</strong> safonova / admin0111<br>
                 <strong>📦 Упаковщицы:</strong> alla, zuhra, galya
             </div>
         </div></div>`;
@@ -435,47 +387,23 @@
         const stats = await getUserRecords(user.id);
         const todayStats = stats.filter(r => r.dateOnly === getTodayStr());
         const todayQty = todayStats.reduce((s,r) => s + r.quantity, 0);
-        const todayEarned = todayStats.reduce((s,r) => s + (r.earned || 0), 0);
         const savedLocation = await getUserSavedLocation(user.id);
         const dayStats = await getUserPeriodStats(user.id, 'day');
-        
         let currentRate = 2.5;
         if (todayQty >= 3001) currentRate = 3.25;
         else if (todayQty >= 2001) currentRate = 3.0;
         else if (todayQty >= 1001) currentRate = 2.75;
-        
         const yesterdayData = await getYesterdayRecords();
         const ratingMap = new Map();
         yesterdayData.records.forEach(r => {
             if (!ratingMap.has(r.userId)) ratingMap.set(r.userId, { name: r.userName, totalQty: 0, totalSum: 0 });
-            const stat = ratingMap.get(r.userId);
-            stat.totalQty += r.quantity;
-            stat.totalSum += (r.earned || 0);
+            const stat = ratingMap.get(r.userId); stat.totalQty += r.quantity; stat.totalSum += (r.earned || 0);
         });
         const ratingList = Array.from(ratingMap.values());
         const byQuantity = [...ratingList].sort((a,b) => b.totalQty - a.totalQty);
         const byEarned = [...ratingList].sort((a,b) => b.totalSum - a.totalSum);
-        
-        const locationHtml = savedLocation ? `
-            <div class="current-location-card"><div><div style="font-size:0.7rem;">Текущий склад / город</div><div class="current-location-value">${escapeHtml(savedLocation.marketplace)} — ${escapeHtml(savedLocation.locationDisplay)}</div></div><button id="changeLocationBtn" class="change-location-btn">✏️ Изменить</button></div>`
-            : `<div class="current-location-card" style="background:#fff3e0;border-left-color:#e67e22;"><div><div style="font-size:0.7rem;">⚠️ Склад не выбран</div><div class="current-location-value">Нажмите "Выбрать склад"</div></div><button id="changeLocationBtn" class="change-location-btn">📍 Выбрать склад</button></div>`;
-        
-        return `<div class="app-container"><div class="glass-card dashboard">
-            <div class="header-dash">
-                <div class="user-info"><div class="user-greeting">👋 ${escapeHtml(user.name)}</div><div class="role-badge">Упаковщица</div></div>
-                <div class="rate-center"><div class="rate-label">Ставка за сегодня</div><div class="rate-value">${currentRate} ₽/шт</div></div>
-                <div class="header-actions"><button id="logoutBtn" class="logout-btn">Выйти</button></div>
-            </div>
-            <div class="form-panel"><div class="form-title">📦 Добавить упаковку</div>${locationHtml}
-                <div class="input-group"><div class="input-field"><label>🏷️ Артикул товара</label><input type="text" id="articleInput" placeholder="Пример: XR-901"></div>
-                <div class="input-field"><label>🔢 Количество (шт)</label><input type="number" id="qtyInput" min="1" value="1"></div>
-                <button id="addPackBtn">➕ Добавить</button></div><div id="msgPanel"></div></div>
-            <div class="stats-period-buttons"><button class="period-btn active" data-period="day">📅 День</button><button class="period-btn" data-period="week">📆 Неделя</button><button class="period-btn" data-period="month">📅 Месяц</button></div>
-            <div class="stats-cards"><div class="stat-card"><div class="value" id="statQty">${dayStats.totalQty}</div><div class="label">Упаковано, шт</div></div>
-            <div class="stat-card"><div class="value" id="statEarned">${dayStats.totalEarned.toFixed(2)}</div><div class="label">Заработано, руб</div></div></div>
-            <div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера (${yesterdayData.date})</div>${!yesterdayData.records.length ? '<div>Нет данных</div>' : `<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">${byQuantity.map((item,idx) => `<li><span class="${idx===0?'rank-1':idx===1?'rank-2':idx===2?'rank-3':''}">${idx+1}. ${escapeHtml(item.name)}</span> <strong>${item.totalQty} шт.</strong></li>`).join('')}</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">${byEarned.map((item,idx) => `<li><span class="${idx===0?'rank-1':idx===1?'rank-2':idx===2?'rank-3':''}">${idx+1}. ${escapeHtml(item.name)}</span> <strong>${item.totalSum.toFixed(2)} руб.</strong></li>`).join('')}</ul></div></div>`}</div>
-            <div class="history-section"><strong>📋 Моя история</strong>${stats.length===0?'<div style="padding:20px;text-align:center;">Нет записей</div>':`<div style="overflow-x:auto;"><table><thead><tr><th>МП</th><th>Город/Склад</th><th>Артикул</th><th>Кол-во</th><th>Заработано</th><th>Дата</th><th></th></tr></thead><tbody>${stats.map(rec => `<tr><td><span class="marketplace-badge ${rec.marketplace==='WB'?'badge-wb':'badge-ozon'}">${rec.marketplace}</span></td><td>${escapeHtml(rec.locationDisplay||'—')}</td><td><strong>${escapeHtml(rec.article)}</strong></td><td>${rec.quantity}</td><td>${(rec.earned||0).toFixed(2)}</td><td style="font-size:0.7rem;">${rec.dateStr ? rec.dateStr.split(',')[0] : '—'}</td><td><span class="delete-icon" data-id="${rec.id}" title="Удалить">🗑️</span></td></tr>`).join('')}</tbody></table></div>`}</div>
-        </div></div>`;
+        const locationHtml = savedLocation ? `<div class="current-location-card"><div><div style="font-size:0.7rem;">Текущий склад / город</div><div class="current-location-value">${escapeHtml(savedLocation.marketplace)} — ${escapeHtml(savedLocation.locationDisplay)}</div></div><button id="changeLocationBtn" class="change-location-btn">✏️ Изменить</button></div>` : `<div class="current-location-card" style="background:#fff3e0;border-left-color:#e67e22;"><div><div style="font-size:0.7rem;">⚠️ Склад не выбран</div><div class="current-location-value">Нажмите "Выбрать склад"</div></div><button id="changeLocationBtn" class="change-location-btn">📍 Выбрать склад</button></div>`;
+        return `<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div class="user-info"><div class="user-greeting">👋 ${escapeHtml(user.name)}</div><div class="role-badge">Упаковщица</div></div><div class="rate-center"><div class="rate-label">Ставка за сегодня</div><div class="rate-value">${currentRate} ₽/шт</div></div><div class="header-actions"><button id="logoutBtn" class="logout-btn">Выйти</button></div></div><div class="form-panel"><div class="form-title">📦 Добавить упаковку</div>${locationHtml}<div class="input-group"><div class="input-field"><label>🏷️ Артикул товара</label><input type="text" id="articleInput" placeholder="Пример: XR-901"></div><div class="input-field"><label>🔢 Количество (шт)</label><input type="number" id="qtyInput" min="1" value="1"></div><button id="addPackBtn">➕ Добавить</button></div><div id="msgPanel"></div></div><div class="stats-period-buttons"><button class="period-btn active" data-period="day">📅 День</button><button class="period-btn" data-period="week">📆 Неделя</button><button class="period-btn" data-period="month">📅 Месяц</button></div><div class="stats-cards"><div class="stat-card"><div class="value" id="statQty">${dayStats.totalQty}</div><div class="label">Упаковано, шт</div></div><div class="stat-card"><div class="value" id="statEarned">${dayStats.totalEarned.toFixed(2)}</div><div class="label">Заработано, руб</div></div></div><div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера (${yesterdayData.date})</div>${!yesterdayData.records.length ? '<div>Нет данных</div>' : `<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">${byQuantity.map((item,idx) => `<li><span class="${idx===0?'rank-1':idx===1?'rank-2':idx===2?'rank-3':''}">${idx+1}. ${escapeHtml(item.name)}</span> <strong>${item.totalQty} шт.</strong></li>`).join('')}</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">${byEarned.map((item,idx) => `<li><span class="${idx===0?'rank-1':idx===1?'rank-2':idx===2?'rank-3':''}">${idx+1}. ${escapeHtml(item.name)}</span> <strong>${item.totalSum.toFixed(2)} руб.</strong></li>`).join('')}</ul></div></div>`}</div><div class="history-section"><strong>📋 Моя история</strong>${stats.length===0?'<div style="padding:20px;text-align:center;">Нет записей</div>':`<div style="overflow-x:auto;"><table><thead><tr><th>МП</th><th>Город/Склад</th><th>Артикул</th><th>Кол-во</th><th>Заработано</th><th>Дата</th><th></th></tr></thead><tbody>${stats.map(rec => `<tr><td><span class="marketplace-badge ${rec.marketplace==='WB'?'badge-wb':'badge-ozon'}">${rec.marketplace}</span></td><td>${escapeHtml(rec.locationDisplay||'—')}</td><td><strong>${escapeHtml(rec.article)}</strong></td><td>${rec.quantity}</td><td>${(rec.earned||0).toFixed(2)}</td><td style="font-size:0.7rem;">${rec.dateStr ? rec.dateStr.split(',')[0] : '—'}</td><td><span class="delete-icon" data-id="${rec.id}" title="Удалить">🗑️</span></td></tr>`).join('')}</tbody></table></div>`}</div></div></div>`;
     }
 
     async function renderAdminPanel(user) {
@@ -484,109 +412,52 @@
         const allRecords = await db.collection('pack_records').orderBy('timestamp', 'desc').get();
         const records = allRecords.docs.map(d => ({ id: d.id, ...d.data() }));
         const today = getTodayStr();
-        
         const packerStats = packers.map(p => {
             const userRecs = records.filter(r => r.userId === p.id);
             const todayRecs = userRecs.filter(r => r.dateOnly === today);
             return { ...p, totalQuantity: userRecs.reduce((s,r)=>s+r.quantity,0), totalEarned: userRecs.reduce((s,r)=>s+(r.earned||0),0), todayQuantity: todayRecs.reduce((s,r)=>s+r.quantity,0), todayEarned: todayRecs.reduce((s,r)=>s+(r.earned||0),0) };
         });
-        
         const yesterdayData = await getYesterdayRecords();
         const ratingMap = new Map();
         yesterdayData.records.forEach(r => {
             if (!ratingMap.has(r.userId)) ratingMap.set(r.userId, { name: r.userName, totalQty: 0, totalSum: 0 });
-            const stat = ratingMap.get(r.userId);
-            stat.totalQty += r.quantity; stat.totalSum += (r.earned || 0);
+            const stat = ratingMap.get(r.userId); stat.totalQty += r.quantity; stat.totalSum += (r.earned || 0);
         });
         const ratingList = Array.from(ratingMap.values());
         const byQuantity = [...ratingList].sort((a,b) => b.totalQty - a.totalQty);
         const byEarned = [...ratingList].sort((a,b) => b.totalSum - a.totalSum);
-        
-        return `<div class="app-container"><div class="glass-card dashboard">
-            <div class="header-dash"><div><div class="user-greeting">📋 Админ: ${escapeHtml(user.name)}</div><div class="role-badge">Управление</div></div>
-            <div class="header-actions"><button id="logoutBtn" class="logout-btn">Выйти</button></div></div>
-            <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;background:#f8fafd;padding:16px;border-radius:20px;">
-                <span>👥 Упаковщиц: ${packerStats.length}</span><span>📦 Всего: ${packerStats.reduce((s,p)=>s+p.totalQuantity,0)} шт.</span><span>💰 Всего: ${packerStats.reduce((s,p)=>s+p.totalEarned,0).toFixed(2)} руб.</span></div>
-            <div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера (${yesterdayData.date})</div>${!yesterdayData.records.length?'<div>Нет данных</div>':`<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">${byQuantity.map((item,idx)=>`<li><span class="${idx===0?'rank-1':idx===1?'rank-2':idx===2?'rank-3':''}">${idx+1}. ${escapeHtml(item.name)}</span> ${item.totalQty} шт.</li>`).join('')}</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">${byEarned.map((item,idx)=>`<li><span class="${idx===0?'rank-1':idx===1?'rank-2':idx===2?'rank-3':''}">${idx+1}. ${escapeHtml(item.name)}</span> ${item.totalSum.toFixed(2)} руб.</li>`).join('')}</ul></div></div>`}</div>
-            <div class="history-section"><strong>🔍 Фильтр по сотруднику и дате</strong>
-            <div class="filter-bar"><div class="input-field"><label>👤 Сотрудник</label><select id="filterEmployeeSelect"><option value="">-- Выберите --</option>${packers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.login)})</option>`).join('')}</select></div>
-            <div class="input-field"><label>📅 Дата</label><input type="date" id="filterDateInput" value="${today}"></div><button id="applyFilterBtn">🔍 Показать</button></div><div id="filterResultContainer"><div style="padding:20px;text-align:center;">Выберите сотрудника</div></div></div>
-            <div class="history-section"><strong>👥 Управление пользователями</strong>
-            <div style="overflow-x:auto;"><table><thead><tr><th>Имя</th><th>Логин</th><th>Роль</th><th>Действие</th></tr></thead>
-            <tbody>${employees.map(emp=>`<tr><td>${escapeHtml(emp.name)}</td><td>${escapeHtml(emp.login)}</td><td>${emp.role==='admin'?'👑 Админ':'📦 Упаковщица'}</td><td>${emp.role!=='admin'?`<button class="delete-user-btn" data-id="${emp.id}" style="background:#b1624b;padding:4px 12px;border-radius:20px;">🗑️ Удалить</button>`:'—'}</td></tr>`).join('')}</tbody></table></div></div>
-        </div></div>`;
+        return `<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div><div class="user-greeting">📋 Админ: ${escapeHtml(user.name)}</div><div class="role-badge">Управление</div></div><div class="header-actions"><button id="logoutBtn" class="logout-btn">Выйти</button></div></div><div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;background:#f8fafd;padding:16px;border-radius:20px;"><span>👥 Упаковщиц: ${packerStats.length}</span><span>📦 Всего: ${packerStats.reduce((s,p)=>s+p.totalQuantity,0)} шт.</span><span>💰 Всего: ${packerStats.reduce((s,p)=>s+p.totalEarned,0).toFixed(2)} руб.</span></div><div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера (${yesterdayData.date})</div>${!yesterdayData.records.length?'<div>Нет данных</div>':`<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">${byQuantity.map((item,idx)=>`<li><span class="${idx===0?'rank-1':idx===1?'rank-2':idx===2?'rank-3':''}">${idx+1}. ${escapeHtml(item.name)}</span> ${item.totalQty} шт.</li>`).join('')}</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">${byEarned.map((item,idx)=>`<li><span class="${idx===0?'rank-1':idx===1?'rank-2':idx===2?'rank-3':''}">${idx+1}. ${escapeHtml(item.name)}</span> ${item.totalSum.toFixed(2)} руб.</li>`).join('')}</ul></div></div>`}</div><div class="history-section"><strong>🔍 Фильтр по сотруднику и дате</strong><div class="filter-bar"><div class="input-field"><label>👤 Сотрудник</label><select id="filterEmployeeSelect"><option value="">-- Выберите --</option>${packers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} (${escapeHtml(p.login)})</option>`).join('')}</select></div><div class="input-field"><label>📅 Дата</label><input type="date" id="filterDateInput" value="${today}"></div><button id="applyFilterBtn">🔍 Показать</button></div><div id="filterResultContainer"><div style="padding:20px;text-align:center;">Выберите сотрудника</div></div></div><div class="history-section"><strong>👥 Управление пользователями</strong><div style="overflow-x:auto;"><table><thead><tr><th>Имя</th><th>Логин</th><th>Роль</th><th>Действие</th></tr></thead><tbody>${employees.map(emp=>`<tr><td>${escapeHtml(emp.name)}</td><td>${escapeHtml(emp.login)}</td><td>${emp.role==='admin'?'👑 Админ':'📦 Упаковщица'}</td><td>${emp.role!=='admin'?`<button class="delete-user-btn" data-id="${emp.id}" style="background:#b1624b;padding:4px 12px;border-radius:20px;">🗑️ Удалить</button>`:'—'}</td></tr>`).join('')}</tbody></table></div></div></div></div>`;
     }
 
-    // ======================== ГЛАВНЫЙ РЕНДЕР ========================
     async function renderApp() {
         const root = document.getElementById("appRoot");
         if (!root) return;
-        
         const session = getSession();
-        
-        if (!session) {
-            root.innerHTML = renderLogin();
-            attachLoginEvents();
-        } else {
+        if (!session) { root.innerHTML = renderLogin(); attachLoginEvents(); }
+        else {
             root.innerHTML = '<div class="loading-spinner">Загрузка...</div>';
             try {
-                if (session.role === "admin") {
-                    root.innerHTML = await renderAdminPanel(session);
-                    attachAdminEvents();
-                } else {
-                    root.innerHTML = await renderPackerPanel(session);
-                    attachPackerEvents();
-                }
-            } catch (error) {
-                console.error('Ошибка рендеринга:', error);
-                root.innerHTML = `<div class="glass-card" style="max-width:500px;margin:0 auto;text-align:center;">
-                    <h3>Ошибка загрузки</h3>
-                    <p style="margin:20px 0;">${error.message}</p>
-                    <button onclick="clearSession();renderApp();">Вернуться на экран входа</button>
-                </div>`;
-            }
+                if (session.role === "admin") { root.innerHTML = await renderAdminPanel(session); attachAdminEvents(); }
+                else { root.innerHTML = await renderPackerPanel(session); attachPackerEvents(); }
+            } catch (error) { root.innerHTML = `<div class="glass-card" style="max-width:500px;margin:0 auto;text-align:center;"><h3>Ошибка загрузки</h3><p style="margin:20px 0;">${error.message}</p><button onclick="clearSession();renderApp();">Вернуться на экран входа</button></div>`; }
         }
     }
 
-    // ======================== СОБЫТИЯ ========================
-    
     function attachLoginEvents() {
         const doLogin = async () => {
             const loginVal = document.getElementById("loginUser").value.trim();
             const passVal = document.getElementById("loginPass").value.trim();
             const loginError = document.getElementById("loginError");
             const loginBtn = document.getElementById("doLogin");
-            
-            if (!loginVal || !passVal) {
-                loginError.style.display = "block";
-                loginError.innerText = "Введите логин и пароль";
-                return;
-            }
-            
-            loginError.style.display = "none";
-            loginBtn.disabled = true;
-            loginBtn.textContent = "Вход...";
-            
-            console.log('Пытаюсь войти:', loginVal);
+            if (!loginVal || !passVal) { loginError.style.display = "block"; loginError.innerText = "Введите логин и пароль"; return; }
+            loginError.style.display = "none"; loginBtn.disabled = true; loginBtn.textContent = "Вход...";
             const user = await loginUser(loginVal, passVal);
-            console.log('Результат входа:', user);
-            
-            if (!user) {
-                loginError.style.display = "block";
-                loginError.innerText = "Неверный логин или пароль";
-                loginBtn.disabled = false;
-                loginBtn.textContent = "Войти";
-                return;
-            }
-            
-            saveSession(user);
-            renderApp();
+            if (!user) { loginError.style.display = "block"; loginError.innerText = "Неверный логин или пароль"; loginBtn.disabled = false; loginBtn.textContent = "Войти"; return; }
+            saveSession(user); renderApp();
         };
-        
         document.getElementById("doLogin").onclick = doLogin;
         document.getElementById("loginUser")?.addEventListener("keypress", e => { if(e.key === "Enter") document.getElementById("loginPass").focus(); });
         document.getElementById("loginPass")?.addEventListener("keypress", e => { if(e.key === "Enter") doLogin(); });
-        
         document.getElementById("doRegister").onclick = async () => {
             const regLogin = document.getElementById("regLogin").value.trim();
             const regPass = document.getElementById("regPass").value.trim();
@@ -594,116 +465,55 @@
             const regError = document.getElementById("regError");
             const result = await registerPacker(regLogin, regPass, regName);
             regError.style.display = "block";
-            if (result.success) {
-                regError.className = "success-msg";
-                regError.innerText = "✅ Регистрация успешна! Теперь войдите.";
-                document.getElementById("regLogin").value = "";
-                document.getElementById("regPass").value = "";
-                document.getElementById("regName").value = "";
-            } else {
-                regError.className = "error-msg";
-                regError.innerText = "❌ " + result.error;
-            }
+            regError.className = result.success ? "success-msg" : "error-msg";
+            regError.innerText = result.success ? "✅ Регистрация успешна! Теперь войдите." : "❌ " + result.error;
+            if (result.success) { document.getElementById("regLogin").value = ""; document.getElementById("regPass").value = ""; document.getElementById("regName").value = ""; }
             setTimeout(() => { regError.style.display = "none"; }, 3000);
         };
     }
 
     function attachPackerEvents() {
-        const session = getSession();
-        if (!session) return;
-        
+        const session = getSession(); if (!session) return;
         document.getElementById("logoutBtn")?.addEventListener("click", () => { clearSession(); renderApp(); });
-        
-        document.getElementById("changeLocationBtn")?.addEventListener("click", () => {
-            showLocationModal(session.id, session.name, () => renderApp());
-        });
-        
-        document.querySelectorAll(".period-btn").forEach(btn => {
-            btn.onclick = async () => {
-                document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                const stats = await getUserPeriodStats(session.id, btn.dataset.period);
-                document.getElementById("statQty").textContent = stats.totalQty;
-                document.getElementById("statEarned").textContent = stats.totalEarned.toFixed(2);
-            };
-        });
-        
-        document.querySelectorAll(".delete-icon").forEach(el => {
-            el.onclick = async (e) => {
-                e.stopPropagation();
-                const id = el.dataset.id;
-                if (id && confirm("Удалить запись?")) { await deleteRecord(id); renderApp(); }
-            };
-        });
-        
+        document.getElementById("changeLocationBtn")?.addEventListener("click", () => { showLocationModal(session.id, session.name, () => renderApp()); });
+        document.querySelectorAll(".period-btn").forEach(btn => { btn.onclick = async () => { document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active")); btn.classList.add("active"); const stats = await getUserPeriodStats(session.id, btn.dataset.period); document.getElementById("statQty").textContent = stats.totalQty; document.getElementById("statEarned").textContent = stats.totalEarned.toFixed(2); }; });
+        document.querySelectorAll(".delete-icon").forEach(el => { el.onclick = async (e) => { e.stopPropagation(); const id = el.dataset.id; if (id && confirm("Удалить запись?")) { await deleteRecord(id); renderApp(); } }; });
         const doAdd = async () => {
             const article = document.getElementById("articleInput")?.value || "";
             const qty = document.getElementById("qtyInput")?.value || "1";
             const msgDiv = document.getElementById("msgPanel");
             const saved = await getUserSavedLocation(session.id);
-            if (!saved) {
-                msgDiv.innerHTML = '<div class="error-msg">❌ Сначала выберите склад / город</div>';
-                setTimeout(() => msgDiv.innerHTML = "", 3000);
-                return;
-            }
+            if (!saved) { msgDiv.innerHTML = '<div class="error-msg">❌ Сначала выберите склад / город</div>'; setTimeout(() => msgDiv.innerHTML = "", 3000); return; }
             const result = await addRecord(article, qty, session.id, session.name, saved.marketplace, saved.locationDisplay, saved.locationRaw);
-            if (result.success) {
-                msgDiv.innerHTML = `<div class="success-msg">✅ ${saved.marketplace} | ${saved.locationDisplay} | ${article.toUpperCase()} x ${qty} шт. | +${result.earned.toFixed(2)} руб.</div>`;
-                document.getElementById("articleInput").value = "";
-                document.getElementById("qtyInput").value = "1";
-                setTimeout(() => renderApp(), 200);
-            } else {
-                msgDiv.innerHTML = `<div class="error-msg">❌ ${result.error}</div>`;
-            }
+            if (result.success) { msgDiv.innerHTML = `<div class="success-msg">✅ ${saved.marketplace} | ${saved.locationDisplay} | ${article.toUpperCase()} x ${qty} шт. | +${result.earned.toFixed(2)} руб.</div>`; document.getElementById("articleInput").value = ""; document.getElementById("qtyInput").value = "1"; setTimeout(() => renderApp(), 200); }
+            else { msgDiv.innerHTML = `<div class="error-msg">❌ ${result.error}</div>`; }
             setTimeout(() => { if (msgDiv) msgDiv.innerHTML = ""; }, 2500);
         };
-        
         document.getElementById("addPackBtn").onclick = doAdd;
-        [document.getElementById("articleInput"), document.getElementById("qtyInput")].forEach(i => {
-            i?.addEventListener("keypress", e => { if(e.key === "Enter") doAdd(); });
-        });
+        [document.getElementById("articleInput"), document.getElementById("qtyInput")].forEach(i => { i?.addEventListener("keypress", e => { if(e.key === "Enter") doAdd(); }); });
     }
 
     function attachAdminEvents() {
         document.getElementById("logoutBtn")?.addEventListener("click", () => { clearSession(); renderApp(); });
-        
-        document.querySelectorAll(".delete-user-btn").forEach(btn => {
-            btn.onclick = async () => {
-                const id = btn.dataset.id;
-                if (id && confirm("Удалить пользователя? Все его записи также будут удалены.")) {
-                    await deleteUser(id); renderApp();
-                }
-            };
-        });
-        
+        document.querySelectorAll(".delete-user-btn").forEach(btn => { btn.onclick = async () => { const id = btn.dataset.id; if (id && confirm("Удалить пользователя? Все его записи также будут удалены.")) { await deleteUser(id); renderApp(); } }; });
         document.getElementById("applyFilterBtn").onclick = async () => {
             const employeeId = document.getElementById("filterEmployeeSelect")?.value;
             const date = document.getElementById("filterDateInput")?.value;
             const container = document.getElementById("filterResultContainer");
             if (!employeeId) { container.innerHTML = '<div style="padding:20px;text-align:center;">⚠️ Выберите сотрудника</div>'; return; }
             if (!date) { container.innerHTML = '<div style="padding:20px;text-align:center;">⚠️ Выберите дату</div>'; return; }
-            
             const employees = await getEmployees();
             const employee = employees.find(e => e.id === employeeId);
             if (!employee) { container.innerHTML = '<div style="padding:20px;text-align:center;">⚠️ Сотрудник не найден</div>'; return; }
-            
             const dayRecords = await getUserDayRecords(employeeId, date);
             if (dayRecords.length === 0) { container.innerHTML = `<div style="padding:20px;text-align:center;">📭 Нет операций у ${escapeHtml(employee.name)} за ${date}</div>`; return; }
-            
             const totalQty = dayRecords.reduce((s,r) => s + r.quantity, 0);
             const totalEarned = dayRecords.reduce((s,r) => s + (r.earned || 0), 0);
             container.innerHTML = `<div style="display:flex;flex-wrap:wrap;gap:10px;background:#f8fafd;padding:12px;border-radius:16px;margin-bottom:12px;"><span>👤 <strong>${escapeHtml(employee.name)}</strong></span><span>📅 <strong>${new Date(date).toLocaleDateString('ru-RU')}</strong></span><span>📦 Упаковано: <strong>${totalQty} шт.</strong></span><span>💰 Заработано: <strong>${totalEarned.toFixed(2)} руб.</strong></span></div><div style="overflow-x:auto;"><table><thead><tr><th>МП</th><th>Город/Склад</th><th>Артикул</th><th>Кол-во</th><th>Заработано</th><th>Время</th><th></th></tr></thead><tbody>${dayRecords.map(rec => `<tr><td><span class="marketplace-badge ${rec.marketplace==='WB'?'badge-wb':'badge-ozon'}">${rec.marketplace}</span></td><td>${escapeHtml(rec.locationDisplay||'—')}</td><td><strong>${escapeHtml(rec.article)}</strong></td><td>${rec.quantity}</td><td>${(rec.earned||0).toFixed(2)}</td><td style="font-size:0.7rem;">${rec.dateStr ? rec.dateStr.split(',')[0] : '—'}</td><td><button class="adminDelBtn" data-id="${rec.id}" style="background:#b1624b;padding:4px 10px;border-radius:20px;">🗑️</button></td></tr>`).join('')}</tbody></table></div>`;
-            
-            document.querySelectorAll(".adminDelBtn").forEach(btn => {
-                btn.onclick = async (e) => {
-                    const id = btn.dataset.id;
-                    if (id && confirm("Удалить запись?")) { await deleteRecord(id); document.getElementById("applyFilterBtn").click(); }
-                };
-            });
+            document.querySelectorAll(".adminDelBtn").forEach(btn => { btn.onclick = async (e) => { const id = btn.dataset.id; if (id && confirm("Удалить запись?")) { await deleteRecord(id); document.getElementById("applyFilterBtn").click(); } }; });
         };
     }
 
-    // ======================== ЗАПУСК ========================
     window.addEventListener("DOMContentLoaded", () => renderApp());
 </script>
 </body>

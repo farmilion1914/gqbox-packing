@@ -23,7 +23,6 @@
         
         body.dark-theme { background: linear-gradient(135deg, #0d1b2a 0%, #1a2740 50%, #0f1f35 100%); }
         
-        /* ========== КНОПКА ТЕМЫ ========== */
         .theme-toggle-fixed {
             position: fixed; top: 10px; right: 10px; z-index: 100;
             background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
@@ -35,7 +34,7 @@
         body.dark-theme .theme-toggle-fixed { background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.2); }
         
         /* ========== ЭКРАН ВХОДА ========== */
-        .login-screen { max-width: 400px; width: 100%; margin: 0 auto; animation: fadeInUp 0.5s ease; }
+        .login-screen { max-width: 420px; width: 100%; margin: 0 auto; animation: fadeInUp 0.5s ease; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         
         .login-card {
@@ -96,9 +95,7 @@
             display: flex; align-items: center; gap: 12px;
             margin: 20px 0; color: #8a9db5; font-size: 0.8rem;
         }
-        .divider-text::before, .divider-text::after {
-            content: ''; flex: 1; height: 1px; background: #d9e2ec;
-        }
+        .divider-text::before, .divider-text::after { content: ''; flex: 1; height: 1px; background: #d9e2ec; }
         body.dark-theme .divider-text::before, body.dark-theme .divider-text::after { background: #3d4555; }
         
         .error-msg { background: #ffe6e2; color: #b13e24; padding: 9px 14px; border-radius: 12px; margin-top: 12px; font-size: 0.82rem; display: none; animation: shake 0.4s ease; }
@@ -110,11 +107,10 @@
         body.dark-theme .footer-text span { color: #5ba0d0; }
         
         /* ========== ОСНОВНОЙ ИНТЕРФЕЙС ========== */
-        .app-container { max-width: 100%; width: 100%; }
-        .dashboard { max-width: 100%; width: 100%; display: none; padding: 0.25rem; }
+        .app-container { max-width: 1200px; width: 100%; margin: 0 auto; }
+        .dashboard { width: 100%; display: none; padding: 0.25rem; }
         .dashboard.active { display: block; }
         
-        /* ========== ШАПКА ========== */
         .employee-header {
             background: linear-gradient(135deg, #1e3c5c 0%, #2a5599 100%);
             color: white; padding: 0.6rem 0.8rem; border-radius: 16px;
@@ -124,7 +120,7 @@
         .user-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
         .user-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
         .user-name { font-size: 1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .role-badge { padding: 2px 8px; border-radius: 15px; font-size: 0.6rem; font-weight: 700; background: #ffd700; color: #1e3a5f; flex-shrink: 0; white-space: nowrap; }
+        .role-badge { padding: 2px 8px; border-radius: 15px; font-size: 0.6rem; font-weight: 700; flex-shrink: 0; white-space: nowrap; }
         .logout-btn { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: white; padding: 6px 12px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 0.8rem; flex-shrink: 0; }
         .header-bottom-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .sync-status { font-size: 0.6rem; color: #a0c4e0; display: flex; align-items: center; gap: 3px; }
@@ -223,10 +219,10 @@
         body.dark-theme .history-section h3 { color: #e4e9f2; }
         
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.72rem; min-width: 500px; }
-        th { background: #eef3f9; padding: 6px 5px; text-align: left; font-size: 0.65rem; color: #1f5e8c; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.78rem; min-width: 500px; }
+        th { background: #eef3f9; padding: 8px 6px; text-align: left; font-size: 0.7rem; color: #1f5e8c; }
         body.dark-theme th { background: #2d3345; color: #c0ccda; }
-        td { padding: 6px 5px; border-bottom: 1px solid #e6edf4; }
+        td { padding: 7px 6px; border-bottom: 1px solid #e6edf4; }
         body.dark-theme td { color: #b0bdd0; border-bottom-color: #3d4555; }
         
         .delete-icon { cursor: pointer; color: #b1624b; font-size: 1rem; padding: 0 4px; }
@@ -237,12 +233,30 @@
         .loading { text-align: center; padding: 30px; color: #667e96; }
         .online-indicator { width: 6px; height: 6px; background: #4caf50; border-radius: 50%; display: inline-block; margin-right: 2px; }
         .offline-indicator { background: #f44336; }
-        .admin-tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
-        .admin-tab { background: #e0e9f2; border: none; padding: 6px 10px; border-radius: 15px; font-weight: 600; cursor: pointer; font-size: 0.72rem; }
+        
+        /* Админ-панель */
+        .admin-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+        .admin-tab { background: #e0e9f2; border: none; padding: 8px 14px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 0.8rem; }
         body.dark-theme .admin-tab { background: #3d4555; color: #c0ccda; }
         .admin-tab.active { background: #1e4a7a; color: white; }
+        .admin-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; background: #f3f9ff; padding: 10px 12px; border-radius: 20px; }
+        body.dark-theme .admin-filters { background: #2d3345; }
+        .admin-filter-select, .admin-filter-date { padding: 7px 12px; border-radius: 20px; border: 1px solid #cbdae6; background: white; font-size: 0.8rem; }
+        body.dark-theme .admin-filter-select, body.dark-theme .admin-filter-date { background: #232837; border-color: #4a5265; color: #e4e9f2; }
+        .admin-filter-btn { background: #1e4a7a; color: white; border: none; padding: 7px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 0.8rem; }
+        .admin-filter-clear { background: #e0e9f2; color: #1e3a5f; border: none; padding: 7px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 0.8rem; }
+        body.dark-theme .admin-filter-clear { background: #3d4555; color: #e4e9f2; }
         .summary-card { display: flex; flex-wrap: wrap; gap: 8px; background: #f8fafd; padding: 10px; border-radius: 14px; margin-bottom: 10px; font-size: 0.8rem; }
         body.dark-theme .summary-card { background: rgba(45,51,65,0.8); color: #e4e9f2; }
+        .period-btn { background: #eef2f7; border: none; padding: 6px 12px; border-radius: 15px; font-size: 0.7rem; cursor: pointer; color: #2c5f8a; }
+        .period-btn.active { background: #2c7cb6; color: white; }
+        .admin-report-result { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+        .stat-item { text-align: center; padding: 8px; background: #f3f9ff; border-radius: 12px; }
+        body.dark-theme .stat-item { background: #232837; }
+        .stat-value { font-size: 1.3rem; font-weight: 800; color: #1e3a5f; }
+        body.dark-theme .stat-value { color: #e4e9f2; }
+        .stat-label { color: #5e7180; font-size: 0.65rem; }
+        body.dark-theme .stat-label { color: #a0adc0; }
     </style>
 </head>
 <body>
@@ -329,6 +343,8 @@
         function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
         function isCrossdock(s) { return OZON_STORES.crossdock.includes(s); }
         
+        // ======================== FIREBASE ФУНКЦИИ ========================
+        
         async function getEmployees() {
             const snap = await db.collection('employees').orderBy('name').get();
             let emps = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -410,6 +426,7 @@
         }
         
         async function deleteRecord(rid) { await db.collection('pack_records').doc(rid).delete(); }
+        
         async function deleteUser(uid) {
             const doc = await db.collection('employees').doc(uid).get();
             if (!doc.exists || doc.data().role === 'admin') return false;
@@ -422,6 +439,8 @@
             await batch.commit();
             return true;
         }
+        
+        // ======================== МОДАЛЬНОЕ ОКНО ========================
         
         function showLocationModal(uid, uname, onSave) {
             const h = `<div id="locationModalOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;"><div style="background:white;border-radius:24px;padding:20px;max-width:460px;width:100%;max-height:90vh;overflow-y:auto;"><h3 style="margin-bottom:16px;color:#1e3a5f;">📍 Выбор склада / города</h3><div class="input-field" style="margin-bottom:12px;"><label>🛍️ Маркетплейс</label><select id="mm"><option value="WB">Wildberries (WB)</option><option value="OZON">OZON</option></select></div><div id="mc"></div><div style="display:flex;gap:10px;margin-top:20px;"><button id="ms" style="flex:1;background:#2a6b3c;">✅ Сохранить</button><button id="mcl" style="flex:1;background:#b0bed0;">Отмена</button></div></div></div>`;
@@ -445,13 +464,15 @@
                 const mp = document.getElementById('mm').value;
                 let ld='', lr='';
                 if (mp==='WB') { ld=document.getElementById('ws')?.value||document.getElementById('wm')?.value||''; if(!ld){alert('Укажите город');return;} lr=ld; }
-                else { const w=document.getElementById('os')?.value; if(!w){alert('Выберите склад');return;} lr=w; if(isCrossdock(w)){const c=document.getElementById('ots')?.value||document.getElementById('otm')?.value; if(!c){alert('Укажите город');return;} ld=`${w} (${c})`;} else ld=w; }
+                else { const w=document.getElementById('os')?.value; if(!w){alert('Выберите склад');return;} lr=w; if(isCrossdock(w)){const ct=document.getElementById('ots')?.value||document.getElementById('otm')?.value; if(!ct){alert('Укажите город');return;} ld=`${w} (${ct})`;} else ld=w; }
                 await saveUserLocation(uid, mp, ld, lr);
                 document.getElementById('locationModalOverlay')?.remove();
                 onSave();
             };
             document.getElementById('mcl').onclick = () => document.getElementById('locationModalOverlay')?.remove();
         }
+        
+        // ======================== РЕНДЕРИНГ ========================
         
         function attachLoginEvents() {
             const dl = async () => {
@@ -526,9 +547,9 @@
                         <div class="stat-card"><div class="value" id="statEarned">${dayStats.totalEarned.toFixed(2)}</div><div class="label">Заработано, руб</div></div>
                     </div>
                     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-                        <button class="period-btn active" data-period="day" style="background:#2c7cb6;color:white;border:none;padding:6px 12px;border-radius:15px;font-size:0.7rem;cursor:pointer;">День</button>
-                        <button class="period-btn" data-period="week" style="background:#eef2f7;border:none;padding:6px 12px;border-radius:15px;font-size:0.7rem;cursor:pointer;">Неделя</button>
-                        <button class="period-btn" data-period="month" style="background:#eef2f7;border:none;padding:6px 12px;border-radius:15px;font-size:0.7rem;cursor:pointer;">Месяц</button>
+                        <button class="period-btn active" data-period="day">День</button>
+                        <button class="period-btn" data-period="week">Неделя</button>
+                        <button class="period-btn" data-period="month">Месяц</button>
                     </div>
                 </div>
                 <div class="rating-container">
@@ -562,29 +583,37 @@
             
             return `<div class="app-container">
                 <div class="glass-card">
+                    <div class="summary-card"><span>👥 Упаковщиц: ${ps.length}</span><span>📦 Всего: ${ps.reduce((s,p)=>s+p.totalQty,0)} шт.</span><span>💰 Всего: ${ps.reduce((s,p)=>s+p.totalEarned,0).toFixed(2)} руб.</span></div>
+                    
                     <div class="admin-tabs">
-                        <button class="admin-tab active" data-tab="stats">📊 Статистика</button>
-                        <button class="admin-tab" data-tab="rating">🏆 Рейтинг</button>
-                        <button class="admin-tab" data-tab="filter">🔍 Поиск</button>
-                        <button class="admin-tab" data-tab="users">👥 Сотрудники</button>
+                        <button class="admin-tab active" data-tab="logs">📋 Все записи</button>
+                        <button class="admin-tab" data-tab="employees">👥 Сотрудники</button>
+                        <button class="admin-tab" data-tab="reports">📊 Отчёты</button>
                     </div>
-                    <div id="tabStats">
-                        <div class="summary-card"><span>👥 Упаковщиц: ${ps.length}</span><span>📦 Всего: ${ps.reduce((s,p)=>s+p.totalQty,0)} шт.</span><span>💰 Всего: ${ps.reduce((s,p)=>s+p.totalEarned,0).toFixed(2)} руб.</span></div>
-                    </div>
-                    <div id="tabRating" style="display:none;">
-                        <div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера (${yd.date})</div>${!yd.records.length?'<div>Нет данных</div>':`<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">${bq.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> ${it.totalQty} шт.</li>`).join('')}</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">${be.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> ${it.totalSum.toFixed(2)} руб.</li>`).join('')}</ul></div></div>`}</div>
-                    </div>
-                    <div id="tabFilter" style="display:none;">
-                        <div class="filter-bar">
-                            <div class="input-field"><label>👤 Сотрудник</label><select id="fe"><option value="">Все</option>${packers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></div>
-                            <div class="input-field"><label>📅 Дата</label><input type="date" id="fd" value="${today}"></div>
-                            <button id="af" style="width:auto;">🔍</button>
+                    
+                    <div id="tabLogs">
+                        <div class="admin-filters">
+                            <select id="adminFilterEmployee" class="admin-filter-select"><option value="">Все сотрудники</option>${packers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select>
+                            <input type="date" id="adminFilterDate" class="admin-filter-date" value="${today}">
+                            <button class="admin-filter-btn" id="applyAdminFilterBtn">🔍</button>
+                            <button class="admin-filter-clear" id="clearAdminFilterBtn">🗑️</button>
                         </div>
-                        <div id="fr" style="text-align:center;padding:10px;">Выберите сотрудника</div>
+                        <div class="table-wrap"><table><thead><tr><th>Время</th><th>МП</th><th>Сотрудник</th><th>Склад</th><th>Артикул</th><th>Кол-во</th><th>₽</th><th></th></tr></thead><tbody id="adminLogsBody"><tr><td colspan="8" class="loading">Выберите фильтр и нажмите 🔍</td></tr></tbody></table></div>
                     </div>
-                    <div id="tabUsers" style="display:none;">
-                        <button id="addEmp" style="width:auto;margin-bottom:10px;padding:8px 14px;font-size:0.8rem;">➕ Добавить</button>
-                        <div class="table-wrap"><table><thead><tr><th>Имя</th><th>Логин</th><th>Роль</th><th></th></tr></thead><tbody>${emps.map(e=>`<tr><td>${escapeHtml(e.name)}</td><td>${escapeHtml(e.login)}</td><td>${e.role==='admin'?'👑':'📦'}</td><td>${e.role!=='admin'?`<button class="delete-icon" data-uid="${e.id}" data-uname="${e.name}" style="font-size:0.8rem;">🗑️</button>`:'—'}</td></tr>`).join('')}</tbody></table></div>
+                    
+                    <div id="tabEmployees" style="display:none;">
+                        <button id="addEmployeeAdminBtn" style="width:auto;padding:8px 14px;margin-bottom:10px;font-size:0.8rem;">➕ Добавить сотрудника</button>
+                        <div class="table-wrap"><table><thead><tr><th>Имя</th><th>Логин</th><th>Роль</th><th>Статус</th><th></th></tr></thead><tbody>${emps.map(e=>`<tr><td><strong>${escapeHtml(e.name)}</strong></td><td>${escapeHtml(e.login)}</td><td>${e.role==='admin'?'👑 Админ':'📦 Упаковщица'}</td><td>✅</td><td>${e.role!=='admin'?`<button class="delete-icon" data-uid="${e.id}" data-uname="${e.name}">🗑️</button>`:'—'}</td></tr>`).join('')}</tbody></table></div>
+                    </div>
+                    
+                    <div id="tabReports" style="display:none;">
+                        <div class="admin-filters">
+                            <select id="reportEmployeeSelect" class="admin-filter-select"><option value="">Все сотрудники</option>${packers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select>
+                            <input type="date" id="reportStartDate" class="admin-filter-date" value="${new Date(new Date().setDate(new Date().getDate()-7)).toISOString().split('T')[0]}">
+                            <input type="date" id="reportEndDate" class="admin-filter-date" value="${today}">
+                            <button class="admin-filter-btn" id="generateAdminReportBtn">📈 Сформировать</button>
+                        </div>
+                        <div id="adminReportResult" class="admin-report-result"><div style="text-align:center;padding:20px;">Выберите период и нажмите «Сформировать»</div></div>
                     </div>
                 </div>
             </div>`;
@@ -610,12 +639,14 @@
             }
         }
         
+        // ======================== СОБЫТИЯ ========================
+        
         function attachPackerEvents() {
             document.getElementById('logoutBtn').addEventListener('click', () => { clearSession(); document.getElementById('loginScreen').style.display='block'; document.getElementById('dashboard').classList.remove('active'); });
             document.getElementById('changeLocationBtn')?.addEventListener('click', () => showLocationModal(currentUser.id, currentUser.name, renderMain));
             document.querySelectorAll('.period-btn').forEach(b => b.addEventListener('click', async () => {
-                document.querySelectorAll('.period-btn').forEach(x => { x.style.background='#eef2f7'; x.style.color='#2c5f8a'; });
-                b.style.background='#2c7cb6'; b.style.color='white';
+                document.querySelectorAll('.period-btn').forEach(x => { x.classList.remove('active'); });
+                b.classList.add('active');
                 const s = await getUserPeriodStats(currentUser.id, b.dataset.period);
                 document.getElementById('statQty').textContent = s.totalQty;
                 document.getElementById('statEarned').textContent = s.totalEarned.toFixed(2);
@@ -639,23 +670,47 @@
         
         function attachAdminEvents() {
             document.getElementById('logoutBtn').addEventListener('click', () => { clearSession(); document.getElementById('loginScreen').style.display='block'; document.getElementById('dashboard').classList.remove('active'); });
+            
+            // Вкладки
             document.querySelectorAll('.admin-tab').forEach(t => t.addEventListener('click', () => {
                 document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
                 t.classList.add('active');
-                ['tabStats','tabRating','tabFilter','tabUsers'].forEach(id => document.getElementById(id).style.display='none');
-                document.getElementById('tab'+t.dataset.tab.charAt(0).toUpperCase()+t.dataset.tab.slice(1)).style.display='block';
+                document.getElementById('tabLogs').style.display = t.dataset.tab === 'logs' ? 'block' : 'none';
+                document.getElementById('tabEmployees').style.display = t.dataset.tab === 'employees' ? 'block' : 'none';
+                document.getElementById('tabReports').style.display = t.dataset.tab === 'reports' ? 'block' : 'none';
             }));
-            document.getElementById('af')?.addEventListener('click', async () => {
-                const eid = document.getElementById('fe').value, date = document.getElementById('fd').value, c = document.getElementById('fr');
-                if (!eid) { c.innerHTML='<div style="padding:10px;">Выберите сотрудника</div>'; return; }
-                const emp = employees.find(e => e.id === eid);
-                const dr = await getUserDayRecords(eid, date);
-                if (dr.length === 0) { c.innerHTML=`<div style="padding:10px;">📭 Нет операций у ${escapeHtml(emp.name)} за ${date}</div>`; return; }
-                const tq = dr.reduce((s,r)=>s+r.quantity,0), te = dr.reduce((s,r)=>s+(r.earned||0),0);
-                c.innerHTML = `<div class="summary-card"><span>👤 ${escapeHtml(emp.name)}</span><span>📅 ${new Date(date).toLocaleDateString('ru-RU')}</span><span>📦 ${tq} шт.</span><span>💰 ${te.toFixed(2)} руб.</span></div><div class="table-wrap"><table><thead><tr><th>МП</th><th>Склад</th><th>Артикул</th><th>Кол-во</th><th>₽</th><th></th></tr></thead><tbody>${dr.map(r=>`<tr><td><span class="marketplace-badge ${r.marketplace==='WB'?'badge-wb':'badge-ozon'}">${r.marketplace}</span></td><td>${escapeHtml(r.locationDisplay||'—')}</td><td>${escapeHtml(r.article)}</td><td>${r.quantity}</td><td>${(r.earned||0).toFixed(0)}</td><td><span class="delete-icon" data-id="${r.id}">🗑️</span></td></tr>`).join('')}</tbody></table></div>`;
-                c.querySelectorAll('.delete-icon').forEach(el => el.addEventListener('click', async (e) => { e.stopPropagation(); if(confirm('Удалить?')){await deleteRecord(el.dataset.id); document.getElementById('af').click();} }));
+            
+            // Фильтр записей
+            document.getElementById('applyAdminFilterBtn')?.addEventListener('click', async () => {
+                const eid = document.getElementById('adminFilterEmployee').value;
+                const date = document.getElementById('adminFilterDate').value;
+                const tbody = document.getElementById('adminLogsBody');
+                tbody.innerHTML = '<tr><td colspan="8" class="loading">Загрузка...</td></tr>';
+                
+                let query = db.collection('pack_records');
+                if (eid) query = query.where('userId', '==', eid);
+                if (date) query = query.where('dateOnly', '==', date);
+                const snap = await query.orderBy('timestamp', 'desc').limit(100).get();
+                
+                if (snap.empty) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;">Нет записей</td></tr>'; return; }
+                let h = '';
+                snap.docs.forEach(d => {
+                    const l = d.data();
+                    const time = l.timestamp ? new Date(l.timestamp.toDate()).toLocaleString('ru-RU') : '—';
+                    h += `<tr><td style="font-size:0.65rem;">${time}</td><td><span class="marketplace-badge ${l.marketplace==='WB'?'badge-wb':'badge-ozon'}">${l.marketplace}</span></td><td><strong>${escapeHtml(l.userName)}</strong></td><td>${escapeHtml(l.locationDisplay||'—')}</td><td>${escapeHtml(l.article)}</td><td>${l.quantity}</td><td>${(l.earned||0).toFixed(0)}</td><td><span class="delete-icon" data-id="${d.id}">🗑️</span></td></tr>`;
+                });
+                tbody.innerHTML = h;
+                tbody.querySelectorAll('.delete-icon').forEach(el => el.addEventListener('click', async (e) => { e.stopPropagation(); if(confirm('Удалить?')){await deleteRecord(el.dataset.id); document.getElementById('applyAdminFilterBtn').click();} }));
             });
-            document.getElementById('addEmp')?.addEventListener('click', async () => {
+            
+            document.getElementById('clearAdminFilterBtn')?.addEventListener('click', () => {
+                document.getElementById('adminFilterEmployee').value = '';
+                document.getElementById('adminFilterDate').value = getTodayStr();
+                document.getElementById('adminLogsBody').innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;">Выберите фильтр и нажмите 🔍</td></tr>';
+            });
+            
+            // Добавление сотрудника
+            document.getElementById('addEmployeeAdminBtn')?.addEventListener('click', async () => {
                 const n = prompt('Фамилия нового сотрудника:');
                 if (n) {
                     const l = n.toLowerCase().replace(/\s/g,'');
@@ -664,9 +719,44 @@
                     renderMain();
                 }
             });
+            
+            // Удаление сотрудников
             document.querySelectorAll('.delete-icon[data-uid]').forEach(el => el.addEventListener('click', async (e) => {
                 if (confirm(`Удалить ${el.dataset.uname}?`)) { await deleteUser(el.dataset.uid); await getEmployees(); renderMain(); }
             }));
+            
+            // Отчёт
+            document.getElementById('generateAdminReportBtn')?.addEventListener('click', async () => {
+                const eid = document.getElementById('reportEmployeeSelect').value;
+                const start = document.getElementById('reportStartDate').value;
+                const end = document.getElementById('reportEndDate').value;
+                if (!start || !end) { alert('Выберите даты'); return; }
+                const container = document.getElementById('adminReportResult');
+                container.innerHTML = '<div style="text-align:center;padding:20px;">Загрузка...</div>';
+                
+                let query = db.collection('pack_records').where('dateOnly', '>=', start).where('dateOnly', '<=', end);
+                if (eid) query = query.where('userId', '==', eid);
+                const snap = await query.get();
+                
+                const stats = { received:0, accepted:0, shippedPush:0, unloaded:0, reworked:0, totalQty:0, totalEarned:0, days:new Set() };
+                snap.docs.forEach(doc => {
+                    const l = doc.data();
+                    stats.days.add(l.dateOnly);
+                    const qty = l.quantity || 0;
+                    stats.totalQty += qty;
+                    stats.totalEarned += (l.earned || 0);
+                    if (l.action?.includes('Принял')) stats.received += qty;
+                    if (l.action?.includes('Отгрузил')) stats.shippedPush += qty;
+                    if (l.action?.includes('Выгрузка')) stats.unloaded += qty;
+                });
+                
+                container.innerHTML = `
+                    <div class="stat-item"><div class="stat-value">${stats.days.size}</div><div class="stat-label">Дней</div></div>
+                    <div class="stat-item"><div class="stat-value">${stats.totalQty}</div><div class="stat-label">Всего упаковано</div></div>
+                    <div class="stat-item"><div class="stat-value">${stats.totalEarned.toFixed(2)}</div><div class="stat-label">Заработано, руб</div></div>
+                `;
+            });
+            
             updateOnlineStatus();
         }
         

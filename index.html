@@ -140,25 +140,64 @@
     function getTodayStr() { return new Date().toISOString().slice(0,10); }
 
     async function createInitialEmployees() {
+        console.log('СОЗДАЮ АДМИНОВ...');
         await db.collection('employees').add({ login: 'safonova', password: 'admin0111', name: 'Сафонова Е.', role: 'admin' });
         await db.collection('employees').add({ login: 'sazonov', password: 'admin123', name: 'Sazonov', role: 'admin' });
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log('АДМИНЫ СОЗДАНЫ!');
+        await new Promise(resolve => setTimeout(resolve, 1500));
     }
 
     async function getEmployees() {
         try {
             const snap = await db.collection('employees').orderBy('name').get();
             let employees = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            if (employees.length === 0) { await createInitialEmployees(); const s2 = await db.collection('employees').orderBy('name').get(); employees = s2.docs.map(d => ({ id: d.id, ...d.data() })); }
+            if (employees.length === 0) { 
+                await createInitialEmployees(); 
+                const s2 = await db.collection('employees').orderBy('name').get(); 
+                employees = s2.docs.map(d => ({ id: d.id, ...d.data() })); 
+            }
             return employees;
         } catch (e) { return []; }
     }
 
     async function loginUser(l, p) {
-        const a = await db.collection('employees').get();
-        if (a.empty) await createInitialEmployees();
-        const s = await db.collection('employees').where('login','==',l).where('password','==',p).get();
-        return s.empty ? null : { id: s.docs[0].id, ...s.docs[0].data() };
+        try {
+            console.log('🔍 Ищу:', l, 'пароль:', p);
+            
+            const allSnap = await db.collection('employees').get();
+            console.log('📊 Всего сотрудников:', allSnap.size);
+            
+            if (allSnap.empty) {
+                console.log('📭 Пусто — создаю админов');
+                await createInitialEmployees();
+            }
+            
+            // Отладка
+            const debugSnap = await db.collection('employees').get();
+            debugSnap.docs.forEach(doc => {
+                const data = doc.data();
+                console.log(`👤 ${data.name} | логин: "${data.login}" | пароль: "${data.password}"`);
+            });
+            
+            const snap = await db.collection('employees')
+                .where('login', '==', l)
+                .where('password', '==', p)
+                .get();
+            
+            console.log('🎯 Найдено:', snap.size);
+            
+            if (snap.empty) {
+                console.log('❌ Не найдено');
+                return null;
+            }
+            
+            const user = { id: snap.docs[0].id, ...snap.docs[0].data() };
+            console.log('✅ ВХОД:', user.name);
+            return user;
+        } catch (error) {
+            console.error('💥 Ошибка:', error);
+            return null;
+        }
     }
 
     async function registerUser(l, p, n, r) {

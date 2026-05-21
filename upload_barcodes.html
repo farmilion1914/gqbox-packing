@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Загрузка базы штрихкодов в Firebase</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; max-width: 600px; margin: 0 auto; }
+        .progress { background: #e0e0e0; height: 30px; border-radius: 15px; overflow: hidden; margin: 20px 0; }
+        .progress-bar { background: #4caf50; height: 100%; width: 0%; transition: width 0.3s; text-align: center; color: white; line-height: 30px; font-weight: bold; }
+        .log { background: #1e1e1e; color: #00ff00; font-family: monospace; padding: 15px; border-radius: 10px; max-height: 400px; overflow-y: auto; font-size: 0.8rem; }
+        button { background: #2c7cb6; color: white; border: none; padding: 14px 30px; border-radius: 30px; font-size: 1.1rem; cursor: pointer; margin-top: 20px; width: 100%; }
+        button:disabled { background: #ccc; }
+        .success { color: #4caf50; font-weight: bold; }
+        .info { color: #2196f3; }
+    </style>
+</head>
+<body>
+    <h2>📦 Загрузка базы штрихкодов в Firebase</h2>
+    <p>Нажмите кнопку для загрузки всех штрихкодов в коллекцию <code>barcodes</code></p>
+    
+    <div class="progress"><div class="progress-bar" id="progressBar">0%</div></div>
+    <div class="log" id="log">Готов к загрузке...</div>
+    <button id="uploadBtn" onclick="startUpload()">🚀 Загрузить базу</button>
+    
+    <script>
+        // Ваша конфигурация Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWmeGhe0wFrqULYqvnCX4WY9EhuPFEjHs",
+            authDomain: "packing23-11afd.firebaseapp.com",
+            projectId: "packing23-11afd",
+            storageBucket: "packing23-11afd.firebasestorage.app",
+            messagingSenderId: "786002108142",
+            appId: "1:786002108142:web:213b1f60bd6ec5f9429dff"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // База штрихкодов
+        const BARCODE_DB = {
+            // EAN13
+            '4673769270258': 'V19004-ST1', '2048611227247': '10025-2/01', '2037318436311': 'калич2',
+            '2051237285430': '10026/06', '4673769270494': 'D98005/28-W', '2041404394300': 'V10009/02',
+            '4673769270579': 'D98005/01-W', '2042197553509': 'D98005/01-W', '4673769270241': 'V10011-2/02',
+            '4673769270517': 'D98005/24-W', '4673769271521': 'D19003-1.2/02',
+            '2037226824309': '20001-3/01', '2037746352276': 'V19019', '4673769272498': '10030-3/01',
+            '2037697959517': 'V19003-2/02', '4673769270210': 'V10011-PR/02', '2039086662558': 'V10011-3/02',
+            '4673769270784': 'D19016/01', '2038570684021': 'V10002E-2.1/02', '2037594480503': 'V10002E/01',
+            '2037594522623': 'V10002E-2/01', '2039017186887': '20011-2/02', '2037720441293': '157282791',
+            '2037697803117': 'V19004-ST1',
+            // Code128
+            'OZN2031212969': '11019-2/01', 'OZN3181658516': 'Z19024-2.1/02', 'OZN2859613852': 'K13005',
+            'OZN2859768951': 'V13004', 'OZN2859641939': 'K13002', 'OZN3181577729': 'Z19024-1.2/02',
+        };
+        
+        function log(msg) {
+            const el = document.getElementById('log');
+            el.innerHTML += '<br>' + msg;
+            el.scrollTop = el.scrollHeight;
+        }
+        
+        async function startUpload() {
+            const btn = document.getElementById('uploadBtn');
+            btn.disabled = true;
+            btn.textContent = 'Загрузка...';
+            
+            const entries = Object.entries(BARCODE_DB);
+            const total = entries.length;
+            let uploaded = 0;
+            let skipped = 0;
+            
+            log(`<span class="info">Начинаю загрузку ${total} штрихкодов...</span>`);
+            
+            for (const [barcode, article] of entries) {
+                try {
+                    // Проверяем, есть ли уже такой штрихкод
+                    const snap = await db.collection('barcodes')
+                        .where('barcode', '==', barcode)
+                        .limit(1)
+                        .get();
+                    
+                    if (snap.empty) {
+                        await db.collection('barcodes').add({
+                            barcode: barcode,
+                            article: article,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        uploaded++;
+                    } else {
+                        skipped++;
+                    }
+                    
+                    const progress = Math.round((uploaded + skipped) / total * 100);
+                    document.getElementById('progressBar').style.width = progress + '%';
+                    document.getElementById('progressBar').textContent = progress + '%';
+                    
+                } catch (e) {
+                    log(`❌ Ошибка: ${barcode} - ${e.message}`);
+                }
+            }
+            
+            log(`<span class="success">✅ Готово!</span>`);
+            log(`Загружено: ${uploaded}`);
+            log(`Пропущено (уже были): ${skipped}`);
+            log(`Всего обработано: ${total}`);
+            
+            btn.textContent = '✅ Загрузка завершена';
+        }
+    </script>
+</body>
+</html>

@@ -113,7 +113,7 @@
 <body>
 <div id="appRoot"><div class="loading-spinner">Загрузка...</div></div>
 
-<!-- Сканер теперь всегда в DOM, вне контейнера приложения -->
+<!-- Сканер всегда в DOM, вне контейнера приложения -->
 <div id="scannerOverlay">
     <div id="scannerView"></div>
     <div class="scanner-hint">📷 Наведите камеру на штрихкод</div>
@@ -157,7 +157,6 @@
             return;
         }
         
-        // Проверка поддержки камеры
         if (!navigator.mediaDevices?.getUserMedia) {
             alert('Камера не поддерживается этим устройством');
             return;
@@ -166,7 +165,6 @@
         overlay.classList.add('active');
         view.innerHTML = '';
         
-        // Останавливаем предыдущий экземпляр сканера
         if(html5QrCode){
             html5QrCode.stop().then(() => {
                 console.log('Previous scanner stopped');
@@ -375,6 +373,8 @@
         yd.records.forEach(r=>{if(!rm.has(r.userId))rm.set(r.userId,{name:r.userName,totalQty:0,totalSum:0});const s=rm.get(r.userId);s.totalQty+=r.quantity;s.totalSum+=r.earned||0;});
         const rl=Array.from(rm.values());const bq=[...rl].sort((a,b)=>b.totalQty-a.totalQty);const be=[...rl].sort((a,b)=>b.totalSum-a.totalSum);
         const locHtml=savedLoc?`<div class="current-location-card"><div><div style="font-size:0.7rem;">Текущий склад</div><div class="current-location-value">${escapeHtml(savedLoc.marketplace)} — ${escapeHtml(savedLoc.locationDisplay)}</div></div><button id="changeLocationBtn" class="change-location-btn">✏️</button></div>`:`<div class="current-location-card" style="background:#fff3e0;border-left-color:#e67e22;"><div><div style="font-size:0.7rem;">⚠️ Склад не выбран</div><div class="current-location-value">Нажмите "Выбрать"</div></div><button id="changeLocationBtn" class="change-location-btn">📍 Выбрать</button></div>`;
+        
+        // ВАЖНОЕ ИЗМЕНЕНИЕ: убрана колонка с кнопкой удаления (🗑️) из таблицы истории
         return `<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div class="user-info"><div class="user-greeting">👋 ${escapeHtml(user.name)}</div><div class="role-badge ${isOp?'operator':''}">${isOp?'Оператор':'Упаковщица'}</div></div><div class="rate-center"><div class="rate-label">Ставка</div><div class="rate-value">${rate} ₽/шт</div></div><div class="header-actions"><button id="logoutBtn" class="logout-btn" type="button">🚪 Выйти</button></div></div>
         <div class="form-panel"><div class="form-title">📦 Добавить упаковку</div>${locHtml}
         <div class="input-group">
@@ -386,7 +386,7 @@
         <div style="display:flex;gap:6px;margin-bottom:12px;"><button class="period-btn active" data-period="day">День</button><button class="period-btn" data-period="week">Неделя</button><button class="period-btn" data-period="month">Месяц</button></div>
         <div class="stats-cards"><div class="stat-card"><div class="value" id="statQty">${dayStats.totalQty}</div><div class="label">Упаковано, шт</div></div><div class="stat-card"><div class="value" id="statEarned">${dayStats.totalEarned.toFixed(2)}</div><div class="label">Заработано, руб</div></div></div>
         <div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера (${yd.date})</div>${!yd.records.length?'<div>Нет данных</div>':`<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">${bq.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> <strong>${it.totalQty} шт.</strong></li>`).join('')}</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">${be.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> <strong>${it.totalSum.toFixed(2)} руб.</strong></li>`).join('')}</ul></div></div>`}</div>
-        <div class="history-section"><strong>📋 Моя история</strong>${stats.length===0?'<div style="padding:20px;">Нет записей</div>':`<div style="overflow-x:auto;"><table><thead><tr><th>ИП</th><th>МП</th><th>Склад</th><th>Артикул</th><th>Кол-во</th><th>₽</th><th>Дата</th><th></th></tr></thead><tbody>${stats.map(r=>`<tr><td>${r.ip?`<span class="ip-badge ip-${r.ip}">${r.ip}</span>`:'—'}</td><td><span class="marketplace-badge ${r.marketplace==='WB'?'badge-wb':'badge-ozon'}">${r.marketplace}</span></td><td>${escapeHtml(r.locationDisplay||'—')}</td><td><strong>${escapeHtml(r.article)}</strong></td><td>${r.quantity}</td><td>${(r.earned||0).toFixed(2)}</td><td style="font-size:0.7rem;">${r.dateStr?r.dateStr.split(',')[0]:'—'}</td><td><span class="delete-icon" data-id="${r.id}" title="Удалить запись">🗑️</span></td></tr>`).join('')}</tbody></table></div>`}</div></div></div>`;
+        <div class="history-section"><strong>📋 Моя история</strong>${stats.length===0?'<div style="padding:20px;">Нет записей</div>':`<div style="overflow-x:auto;"><table><thead><tr><th>ИП</th><th>МП</th><th>Склад</th><th>Артикул</th><th>Кол-во</th><th>₽</th><th>Дата</th></tr></thead><tbody>${stats.map(r=>`<tr><td>${r.ip?`<span class="ip-badge ip-${r.ip}">${r.ip}</span>`:'—'}</td><td><span class="marketplace-badge ${r.marketplace==='WB'?'badge-wb':'badge-ozon'}">${r.marketplace}</span></td><td>${escapeHtml(r.locationDisplay||'—')}</td><td><strong>${escapeHtml(r.article)}</strong></td><td>${r.quantity}</td><td>${(r.earned||0).toFixed(2)}</td><td style="font-size:0.7rem;">${r.dateStr?r.dateStr.split(',')[0]:'—'}</td></tr>`).join('')}</tbody></table></div>`}</div></div></div>`;
     }
     
     async function renderAdminPanel(user){
@@ -497,17 +497,6 @@
                 const statEarned = document.getElementById("statEarned");
                 if (statQty) statQty.textContent = st.totalQty;
                 if (statEarned) statEarned.textContent = st.totalEarned.toFixed(2);
-            };
-        });
-        
-        // Кнопки удаления записей
-        document.querySelectorAll(".delete-icon").forEach(el=>{
-            el.onclick = async function(e) {
-                e.stopPropagation();
-                if (el.dataset.id && confirm("Удалить эту запись?")) {
-                    await deleteRecord(el.dataset.id);
-                    renderApp();
-                }
             };
         });
         

@@ -147,60 +147,73 @@
     const IP_LIST = ["КАА","КЮА","БМС","ДЕВ"];
     function getTodayStr() { return new Date().toISOString().slice(0,10); }
     
-    // ========== СКАНЕР ==========
+    // ========== СКАНЕР (ИСПРАВЛЕННЫЙ) ==========
     let html5QrCode = null;
     
-    // Поиск штрихкода: сначала Firebase → потом локально
+    function logToScreen(msg) {
+        console.log(msg);
+        const el = document.getElementById('scannerLog');
+        if (el) {
+            el.textContent = msg;
+            setTimeout(() => { if (el) el.textContent = ''; }, 3000);
+        }
+    }
+    
+    // Поиск штрихкода: Firebase → локально
     async function findBarcode(barcode) {
         const clean = barcode.trim();
         console.log('🔍 Поиск:', clean);
         
-        // 1. Ищем в Firebase
         try {
             const snap = await db.collection('barcodes').where('barcode','==',clean).limit(1).get();
             if (!snap.empty) {
-                const article = snap.docs[0].data().article;
-                console.log('✅ Firebase:', article);
-                return article;
-            }
-        } catch(e) { console.log('⚠️ Ошибка Firebase:', e.message); }
-        
-        // 2. Частичное совпадение в Firebase
-        try {
-            const snap = await db.collection('barcodes')
-                .where('barcode','>=',clean.substring(0,4))
-                .where('barcode','<=',clean.substring(0,4)+'\uf8ff')
-                .limit(10).get();
-            for (const doc of snap.docs) {
-                const data = doc.data();
-                if (clean.includes(data.barcode) || data.barcode.includes(clean)) {
-                    console.log('✅ Частичное Firebase:', data.article);
-                    return data.article;
-                }
+                console.log('✅ Firebase:', snap.docs[0].data().article);
+                return snap.docs[0].data().article;
             }
         } catch(e) {}
         
-        // 3. Не найдено
         console.log('❌ Не найдено, использую:', clean);
         return clean;
     }
     
     function startScanner() {
-        document.getElementById('scannerOverlay').classList.add('active');
-        document.getElementById('scannerView').innerHTML = '';
+        const overlay = document.getElementById('scannerOverlay');
+        const view = document.getElementById('scannerView');
+        
+        // Проверка поддержки камеры
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('❌ Камера не поддерживается. Используйте Chrome или Safari.');
+            return;
+        }
+        
+        overlay.classList.add('active');
+        view.innerHTML = '';
+        
         if (html5QrCode) { html5QrCode.stop().catch(()=>{}); html5QrCode = null; }
+        
         html5QrCode = new Html5Qrcode("scannerView");
+        
+        logToScreen('📷 Запуск камеры...');
+        
         html5QrCode.start(
             { facingMode: "environment" },
-            { fps: 10, qrbox: { width: 280, height: 180 } },
+            { fps: 10, qrbox: { width: 280, height: 180 }, aspectRatio: 1.5 },
             async (decodedText) => {
+                logToScreen('✅ Распознано!');
                 if (navigator.vibrate) navigator.vibrate(50);
                 const article = await findBarcode(decodedText.trim());
                 document.getElementById('articleInput').value = article;
                 stopScanner();
             },
-            () => {}
-        ).catch(() => { stopScanner(); });
+            () => {} // Игнорируем ошибки сканирования
+        ).then(() => {
+            logToScreen('✅ Наведите камеру на штрихкод');
+        }).catch((err) => {
+            console.error('Ошибка:', err);
+            alert('Не удалось запустить камеру.\n\nПроверьте:\n1. Сайт открыт по HTTPS\n2. Доступ к камере разрешён\n3. Используете Chrome или Safari');
+            stopScanner();
+        });
+        
         document.getElementById('scanBtn').classList.add('scanning');
         document.getElementById('scanBtn').textContent = '⏹';
     }

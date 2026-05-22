@@ -152,7 +152,7 @@
     
     // ============ PWA Service Worker ============
     if ('serviceWorker' in navigator) {
-        var swCode = "const CACHE_NAME='gqbox-packer-v5';const ASSETS=['./','https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js'];self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE_NAME).then(function(c){return c.addAll(ASSETS).catch(function(){})}));self.skipWaiting()});self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE_NAME}).map(function(k){return caches.delete(k)}))}));self.clients.claim()});self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(function(cached){var fetched=fetch(e.request).then(function(response){if(response&&response.status===200){var clone=response.clone();caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,clone)})}return response}).catch(function(){return cached});return cached||fetched}))});";
+        var swCode = "const CACHE_NAME='gqbox-packer-v6';const ASSETS=['./','https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js'];self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE_NAME).then(function(c){return c.addAll(ASSETS).catch(function(){})}));self.skipWaiting()});self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE_NAME}).map(function(k){return caches.delete(k)}))}));self.clients.claim()});self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(function(cached){var fetched=fetch(e.request).then(function(response){if(response&&response.status===200){var clone=response.clone();caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,clone)})}return response}).catch(function(){return cached});return cached||fetched}))});";
         var swBlob = new Blob([swCode], { type: 'application/javascript' });
         var swUrl = URL.createObjectURL(swBlob);
         navigator.serviceWorker.register(swUrl).then(function(){}).catch(function(){});
@@ -255,51 +255,14 @@
     async function calculateSalary(uid, startDate, endDate) {
         var q = db.collection('pack_records').where('userId','==',uid).where('dateOnly','>=',startDate).where('dateOnly','<=',endDate);
         var snapshot = await q.orderBy('dateOnly').get();
-        
         var records = snapshot.docs.map(function(d) { return { id: d.id, ...d.data() }; });
-        
-        // Группируем по дням
-        var byDay = {};
+        var byDay = {}, byIP = {}, byMP = {};
         records.forEach(function(r) {
-            var day = r.dateOnly;
-            if (!byDay[day]) byDay[day] = { qty: 0, earned: 0 };
-            byDay[day].qty += r.quantity;
-            byDay[day].earned += r.earned || 0;
+            var day = r.dateOnly; if (!byDay[day]) byDay[day] = { qty: 0, earned: 0 }; byDay[day].qty += r.quantity; byDay[day].earned += r.earned || 0;
+            var ip = r.ip || 'Без ИП'; if (!byIP[ip]) byIP[ip] = { qty: 0, earned: 0 }; byIP[ip].qty += r.quantity; byIP[ip].earned += r.earned || 0;
+            var mp = r.marketplace || '—'; if (!byMP[mp]) byMP[mp] = { qty: 0, earned: 0 }; byMP[mp].qty += r.quantity; byMP[mp].earned += r.earned || 0;
         });
-        
-        // Группируем по ИП
-        var byIP = {};
-        records.forEach(function(r) {
-            var ip = r.ip || 'Без ИП';
-            if (!byIP[ip]) byIP[ip] = { qty: 0, earned: 0 };
-            byIP[ip].qty += r.quantity;
-            byIP[ip].earned += r.earned || 0;
-        });
-        
-        // Группируем по маркетплейсу
-        var byMP = {};
-        records.forEach(function(r) {
-            var mp = r.marketplace || '—';
-            if (!byMP[mp]) byMP[mp] = { qty: 0, earned: 0 };
-            byMP[mp].qty += r.quantity;
-            byMP[mp].earned += r.earned || 0;
-        });
-        
-        var totalQty = records.reduce(function(s,r) { return s + r.quantity; }, 0);
-        var totalEarned = records.reduce(function(s,r) { return s + (r.earned || 0); }, 0);
-        var daysWorked = Object.keys(byDay).length;
-        
-        return {
-            records: records,
-            byDay: byDay,
-            byIP: byIP,
-            byMP: byMP,
-            totalQty: totalQty,
-            totalEarned: totalEarned,
-            daysWorked: daysWorked,
-            startDate: startDate,
-            endDate: endDate
-        };
+        return { records: records, byDay: byDay, byIP: byIP, byMP: byMP, totalQty: records.reduce(function(s,r){ return s + r.quantity; }, 0), totalEarned: records.reduce(function(s,r){ return s + (r.earned || 0); }, 0), daysWorked: Object.keys(byDay).length, startDate: startDate, endDate: endDate };
     }
     
     const SESSION_KEY="gqbox_session";
@@ -307,6 +270,7 @@
     function getSession(){ const r=localStorage.getItem(SESSION_KEY); return r?JSON.parse(r):null; }
     function clearSession(){ localStorage.removeItem(SESSION_KEY); }
     function escapeHtml(s){ if(!s)return''; return s.replace(/[&<>]/g,function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[m]; }); }
+    function formatDateForDisplay(s) { if(!s) return '—'; var p = s.split('-'); return p[2]+'.'+p[1]+'.'+p[0]; }
     function isCrossdockStore(s){ return OZON_STORES.crossdock.includes(s); }
     
     function showLocationModal(uid,uname,onSave){
@@ -378,27 +342,15 @@
         const allUsers=[...packers,...operators];
         const uniqueMP=[...new Set(records.map(function(r){ return r.marketplace; }).filter(Boolean))];
         const uniqueCities=[...new Set(records.map(function(r){ return r.locationDisplay; }).filter(Boolean))];
-        
-        // Сотрудники для фильтра зарплаты
         var salaryEmpOptions = allUsers.map(function(p){ return '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>'; }).join('');
         
         return '<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div><div class="user-greeting">📋 Админ: '+escapeHtml(user.name)+'</div><div class="role-badge admin-badge">Управление</div></div><div class="header-actions"><button id="adminExportBtn" class="export-btn" type="button" title="Экспорт в Excel">📥</button><button id="logoutBtn" class="logout-btn" type="button">🚪 Выйти</button></div></div><div class="summary-card"><span>👥 Упаковщиц: '+packers.length+'</span><span>🏭 Операторов: '+operators.length+'</span><span>📦 Всего: '+ps.reduce(function(s,p){ return s+p.totalQuantity; },0)+' шт.</span><span>💰 Всего: '+ps.reduce(function(s,p){ return s+p.totalEarned; },0).toFixed(2)+' руб.</span></div><div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера ('+yd.date+')</div>'+(!yd.records.length?'<div>Нет данных</div>':'<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">'+bq.map(function(it,i){ return '<li><span class="'+(i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'')+'">'+(i+1)+'. '+escapeHtml(it.name)+'</span> '+it.totalQty+' шт.</li>'; }).join('')+'</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">'+be.map(function(it,i){ return '<li><span class="'+(i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'')+'">'+(i+1)+'. '+escapeHtml(it.name)+'</span> '+it.totalSum.toFixed(2)+' руб.</li>'; }).join('')+'</ul></div></div>')+'</div>' +
-        
-        // Блок зарплаты
         '<div class="history-section"><strong>💰 Зарплата сотрудника</strong>' +
-        '<div class="filter-bar">' +
-            '<div class="input-field"><label>👤 Сотрудник</label><select id="salaryEmployeeSelect"><option value="">-- Выберите --</option>'+salaryEmpOptions+'</select></div>' +
-            '<div class="input-field"><label>📅 С</label><input type="date" id="salaryStartDate"></div>' +
-            '<div class="input-field"><label>📅 По</label><input type="date" id="salaryEndDate"></div>' +
-            '<button id="calculateSalaryBtn" class="salary-btn">💰 Рассчитать</button>' +
-        '</div>' +
-        '<div id="salaryResult" class="salary-result"><div style="text-align:center;padding:20px;color:#5b6f86;">Выберите сотрудника и период</div></div>' +
-        '</div>' +
-        
+        '<div class="filter-bar"><div class="input-field"><label>👤 Сотрудник</label><select id="salaryEmployeeSelect"><option value="">-- Выберите --</option>'+salaryEmpOptions+'</select></div><div class="input-field"><label>📅 С</label><input type="date" id="salaryStartDate"></div><div class="input-field"><label>📅 По</label><input type="date" id="salaryEndDate"></div><button id="calculateSalaryBtn" class="salary-btn">💰 Рассчитать</button></div>' +
+        '<div id="salaryResult" class="salary-result"><div style="text-align:center;padding:20px;color:#5b6f86;">Выберите сотрудника и период</div></div></div>' +
         '<div class="history-section"><strong>🔍 Расширенный фильтр</strong><div class="filter-bar"><div class="input-field"><label>👤 Сотрудник</label><select id="filterEmployeeSelect"><option value="">Все</option>'+allUsers.map(function(p){ return '<option value="'+p.id+'">'+escapeHtml(p.name)+' ('+(p.role==='operator'?'Оператор':'Упаковщица')+')</option>'; }).join('')+'</select></div><div class="input-field"><label>📅 Дата</label><input type="date" id="filterDateInput" value="'+today+'"></div><div class="input-field"><label>🛍️ МП</label><select id="filterMP"><option value="">Все</option>'+uniqueMP.map(function(mp){ return '<option value="'+mp+'">'+mp+'</option>'; }).join('')+'</select></div><div class="input-field"><label>📍 Город/Склад</label><select id="filterCity"><option value="">Все</option>'+uniqueCities.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('')+'</select></div><div class="input-field"><label>🏷️ Артикул</label><input type="text" id="filterArticle" placeholder="Артикул"></div><button id="applyFilterBtn" type="button">🔍 Показать</button></div><div id="filterResultContainer"><div style="padding:20px;text-align:center;">Выберите параметры фильтра</div></div></div><div class="history-section"><strong>👥 Управление пользователями</strong>' +
             '<div style="overflow-x:auto;"><table><thead><tr><th>Имя</th><th>Логин</th><th>Роль</th><th></th></tr></thead><tbody id="usersTableBody"></tbody></table></div>' +
-            '<div id="usersPagination" style="display:flex;gap:6px;justify-content:center;align-items:center;margin-top:12px;flex-wrap:wrap;"></div>' +
-        '</div></div></div>';
+            '<div id="usersPagination" style="display:flex;gap:6px;justify-content:center;align-items:center;margin-top:12px;flex-wrap:wrap;"></div></div></div></div>';
     }
     
     let currentUserPage=1; const USERS_PER_PAGE=5; let allEmployeesData=[];
@@ -454,7 +406,6 @@
         const logoutBtn = document.getElementById("logoutBtn"); if (logoutBtn) { logoutBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); stopScanner(); clearSession(); renderApp(); }; }
         const adminExportBtn = document.getElementById('adminExportBtn'); if (adminExportBtn) { adminExportBtn.onclick = async function() { const all = await db.collection('pack_records').orderBy('timestamp','desc').limit(2000).get(); const records = all.docs.map(function(d) { return { id: d.id, ...d.data() }; }); exportToExcel(records, 'Все_записи'); }; }
         
-        // Кнопка расчёта зарплаты
         const calcSalaryBtn = document.getElementById('calculateSalaryBtn');
         if (calcSalaryBtn) {
             calcSalaryBtn.onclick = async function() {
@@ -462,44 +413,27 @@
                 var startDate = document.getElementById('salaryStartDate')?.value;
                 var endDate = document.getElementById('salaryEndDate')?.value;
                 var container = document.getElementById('salaryResult');
-                
                 if (!empId) { alert('Выберите сотрудника'); return; }
                 if (!startDate || !endDate) { alert('Выберите период'); return; }
-                
                 container.innerHTML = '<div style="text-align:center;padding:20px;">Загрузка...</div>';
-                
                 try {
-                    var emp = employees.find(function(e) { return e.id === empId; });
+                    var allEmps = await getEmployees();
+                    var emp = allEmps.find(function(e) { return e.id === empId; });
                     var data = await calculateSalary(empId, startDate, endDate);
-                    
                     var html = '<div style="margin-bottom:12px;"><strong>'+escapeHtml(emp?.name || 'Сотрудник')+'</strong> | '+formatDateForDisplay(startDate)+' — '+formatDateForDisplay(endDate)+'</div>';
-                    
-                    // Общие итоги
                     html += '<div class="salary-row salary-total"><span>📦 Всего упаковано</span><span>'+data.totalQty+' шт.</span></div>';
                     html += '<div class="salary-row salary-total"><span>💰 Всего заработано</span><span>'+data.totalEarned.toFixed(2)+' ₽</span></div>';
                     html += '<div class="salary-row salary-total"><span>📅 Отработано дней</span><span>'+data.daysWorked+' дн.</span></div>';
-                    
-                    // По ИП
                     if (Object.keys(data.byIP).length > 0) {
                         html += '<div style="margin-top:12px;font-weight:700;font-size:0.85rem;">По ИП:</div>';
-                        Object.keys(data.byIP).forEach(function(ip) {
-                            html += '<div class="salary-row"><span>'+escapeHtml(ip)+'</span><span>'+data.byIP[ip].qty+' шт. | '+data.byIP[ip].earned.toFixed(2)+' ₽</span></div>';
-                        });
+                        Object.keys(data.byIP).forEach(function(ip) { html += '<div class="salary-row"><span>'+escapeHtml(ip)+'</span><span>'+data.byIP[ip].qty+' шт. | '+data.byIP[ip].earned.toFixed(2)+' ₽</span></div>'; });
                     }
-                    
-                    // По маркетплейсу
                     if (Object.keys(data.byMP).length > 0) {
                         html += '<div style="margin-top:12px;font-weight:700;font-size:0.85rem;">По маркетплейсу:</div>';
-                        Object.keys(data.byMP).forEach(function(mp) {
-                            html += '<div class="salary-row"><span>'+escapeHtml(mp)+'</span><span>'+data.byMP[mp].qty+' шт. | '+data.byMP[mp].earned.toFixed(2)+' ₽</span></div>';
-                        });
+                        Object.keys(data.byMP).forEach(function(mp) { html += '<div class="salary-row"><span>'+escapeHtml(mp)+'</span><span>'+data.byMP[mp].qty+' шт. | '+data.byMP[mp].earned.toFixed(2)+' ₽</span></div>'; });
                     }
-                    
                     container.innerHTML = html;
-                } catch (error) {
-                    console.error('Salary calc error:', error);
-                    container.innerHTML = '<div style="text-align:center;padding:20px;color:#b13e24;">Ошибка расчёта</div>';
-                }
+                } catch (error) { console.error('Salary calc error:', error); container.innerHTML = '<div style="text-align:center;padding:20px;color:#b13e24;">Ошибка расчёта: '+error.message+'</div>'; }
             };
         }
         
@@ -526,8 +460,6 @@
             const exportFilteredBtn = container.querySelector('#exportFilteredBtn'); if (exportFilteredBtn) { exportFilteredBtn.onclick = function() { exportToExcel(allFilteredRecords, 'Отфильтрованные_записи'); }; }
         }
     }
-    
-    function formatDateForDisplay(s) { if(!s) return '—'; var p = s.split('-'); return p[2]+'.'+p[1]+'.'+p[0]; }
     
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape') stopScanner(); });
     window.addEventListener("DOMContentLoaded", function() { renderApp(); });

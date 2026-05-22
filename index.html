@@ -17,7 +17,7 @@
     
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(145deg, #eef2f7, #d9e2ec); min-height: 100vh; padding: 12px; -webkit-tap-highlight-color: transparent; padding-top: max(12px, env(safe-area-inset-top)); }
+        body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(145deg, #eef2f7, #d9e2ec); min-height: 100vh; padding: 12px; -webkit-tap-highlight-color: transparent; padding-top: max(12px, env(safe-area-inset-top)); overscroll-behavior-y: contain; }
         @media (min-width: 768px) { body { padding: 20px; } }
         .app-container { max-width: 1400px; margin: 0 auto; width: 100%; }
         .glass-card { background: rgba(255,255,255,0.96); backdrop-filter: blur(2px); border-radius: 28px; box-shadow: 0 10px 30px -8px rgba(0,0,0,0.15); padding: 20px; margin-bottom: 20px; }
@@ -121,6 +121,7 @@
         .install-banner .close-banner { margin-left: 8px; background: rgba(255,255,255,0.2); border: none; color: white; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 0.8rem; padding: 0; line-height: 24px; flex-shrink: 0; }
         .ios-install-hint { display: none; background: #fff3e0; border: 1px solid #e67e22; border-radius: 16px; padding: 12px 16px; margin-bottom: 12px; font-size: 0.8rem; color: #e65100; text-align: center; }
         .ios-install-hint.show { display: block; }
+        #pullRefreshIndicator { position: fixed; top: 0; left: 0; width: 100%; text-align: center; padding: 12px; background: #2c7cb6; color: white; z-index: 9999; font-weight: 600; transition: transform 0.3s; transform: translateY(-100%); font-size: 0.9rem; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -134,9 +135,82 @@
 </div>
 
 <script>
+    // ============ Pull-to-Refresh ============
+    (function() {
+        var touchStartY = 0;
+        var pullDown = false;
+        var pullIndicator = null;
+        var refreshing = false;
+        
+        function getIndicator() {
+            if (!pullIndicator) {
+                pullIndicator = document.createElement('div');
+                pullIndicator.id = 'pullRefreshIndicator';
+                pullIndicator.textContent = '🔄 Потяните вниз, чтобы обновить';
+                document.body.appendChild(pullIndicator);
+            }
+            return pullIndicator;
+        }
+        
+        document.addEventListener('touchstart', function(e) {
+            if (refreshing) return;
+            if (window.scrollY <= 5) {
+                touchStartY = e.touches[0].clientY;
+                pullDown = true;
+            }
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', function(e) {
+            if (!pullDown || refreshing) return;
+            var delta = e.touches[0].clientY - touchStartY;
+            if (delta > 60) {
+                var indicator = getIndicator();
+                indicator.textContent = '🔄 Отпустите, чтобы обновить';
+                indicator.style.transform = 'translateY(0)';
+            }
+        }, { passive: true });
+        
+        document.addEventListener('touchend', async function() {
+            if (!pullDown || refreshing) return;
+            var delta = (pullIndicator && pullIndicator.style.transform === 'translateY(0)') ? 1 : 0;
+            pullDown = false;
+            
+            if (!delta && !pullIndicator) return;
+            if (pullIndicator && pullIndicator.style.transform !== 'translateY(0)') return;
+            
+            refreshing = true;
+            var indicator = getIndicator();
+            indicator.textContent = '⏳ Обновление...';
+            indicator.style.transform = 'translateY(0)';
+            
+            try {
+                // Обновляем Service Worker
+                if (navigator.serviceWorker) {
+                    var regs = await navigator.serviceWorker.getRegistrations();
+                    for (var i = 0; i < regs.length; i++) {
+                        try { await regs[i].update(); } catch(e) {}
+                    }
+                }
+                
+                // Очищаем кеш
+                if ('caches' in window) {
+                    var keys = await caches.keys();
+                    for (var j = 0; j < keys.length; j++) {
+                        try { await caches.delete(keys[j]); } catch(e) {}
+                    }
+                }
+            } catch(e) {}
+            
+            indicator.textContent = '✅ Обновлено!';
+            setTimeout(function() {
+                location.reload();
+            }, 300);
+        });
+    })();
+    
     // ============ PWA Service Worker ============
     if ('serviceWorker' in navigator) {
-        var swCode = "const CACHE_NAME='gqbox-packer-v3';const ASSETS=['./','https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js'];self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE_NAME).then(function(c){return c.addAll(ASSETS).catch(function(){})}));self.skipWaiting()});self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE_NAME}).map(function(k){return caches.delete(k)}))}));self.clients.claim()});self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(function(cached){var fetched=fetch(e.request).then(function(response){if(response&&response.status===200){var clone=response.clone();caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,clone)})}return response}).catch(function(){return cached});return cached||fetched}))});";
+        var swCode = "const CACHE_NAME='gqbox-packer-v4';const ASSETS=['./','https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js'];self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE_NAME).then(function(c){return c.addAll(ASSETS).catch(function(){})}));self.skipWaiting()});self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE_NAME}).map(function(k){return caches.delete(k)}))}));self.clients.claim()});self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(function(cached){var fetched=fetch(e.request).then(function(response){if(response&&response.status===200){var clone=response.clone();caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,clone)})}return response}).catch(function(){return cached});return cached||fetched}))});";
         var swBlob = new Blob([swCode], { type: 'application/javascript' });
         var swUrl = URL.createObjectURL(swBlob);
         navigator.serviceWorker.register(swUrl).then(function(){}).catch(function(){});
@@ -432,7 +506,7 @@
         tbody.innerHTML=pageUsers.map(function(e){ return '<tr><td>'+escapeHtml(e.name)+'</td><td>'+escapeHtml(e.login)+'</td><td>'+(e.role==='admin'?'👑 Админ':e.role==='operator'?'🏭 Оператор':'📦 Упаковщица')+'</td><td>'+(e.role!=='admin'?'<button class="delete-user-btn" data-id="'+e.id+'" type="button">🗑️</button>':'—')+'</td></tr>'; }).join('');
         tbody.querySelectorAll(".delete-user-btn").forEach(function(b){ b.onclick=async function(){ if(b.dataset.id&&confirm("Удалить пользователя?")){await deleteUser(b.dataset.id);await loadUsersData();} }; });
         let pHtml='';
-        if(totalPages>1){pHtml='<button class="page-btn" data-upage="1" '+(currentUserPage===1?'disabled':'')+' type="button">««</button><button class="page-btn" data-upage="'+(currentUserPage-1)+'" '+(currentUserPage===1?'disabled':'')+' type="button">«</button><span style="font-size:0.8rem;padding:0 8px;">Стр. '+currentUserPage+' из '+totalPages+'</span><button class="page-btn" data-upage="'+(currentUserPage+1)+'" '+(currentUserPage===totalPages?'disabled':'')+' type="button">»</button><button class="page-btn" data-upage="'+totalPages+'" '+(currentUserPage===totalPages?'disabled':'')+' type="button">»»</button>';}
+        if(totalPages>1){pHtml='<button class="page-btn" data-upage="1" '+(currentPage===1?'disabled':'')+' type="button">««</button><button class="page-btn" data-upage="'+(currentPage-1)+'" '+(currentPage===1?'disabled':'')+' type="button">«</button><span style="font-size:0.8rem;padding:0 8px;">Стр. '+currentPage+' из '+totalPages+'</span><button class="page-btn" data-upage="'+(currentPage+1)+'" '+(currentPage===totalPages?'disabled':'')+' type="button">»</button><button class="page-btn" data-upage="'+totalPages+'" '+(currentPage===totalPages?'disabled':'')+' type="button">»»</button>';}
         pagDiv.innerHTML=pHtml;
         pagDiv.querySelectorAll(".page-btn:not([disabled])").forEach(function(b){ b.onclick=function(){ const page=parseInt(b.dataset.upage); if(page>=1&&page<=totalPages&&page!==currentUserPage){currentUserPage=page;renderUsersPage();} }; });
     }

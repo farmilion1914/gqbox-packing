@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1e5a8a">
     <title>GQ Box | Упаковка WB/OZON</title>
     
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js">
-    </script>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22GQ%20Box%20%E2%80%94%20%D0%A3%D0%BF%D0%B0%D0%BA%D0%BE%D0%B2%D0%BA%D0%B0%22%2C%22short_name%22%3A%22GQ%20Box%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231e5a8a%22%2C%22theme_color%22%3A%22%231e5a8a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMTkyIDE5MiI%2BPHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIHJ4PSI0MCIgZmlsbD0iIzFlNWE4YSIvPjx0ZXh0IHg9Ijk2IiB5PSIxMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtc2l6ZT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5HUTwvdGV4dD48L3N2Zz4%3D%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%22%7D%2C%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI%2BPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMDAiIGZpbGw9IiMxZTVhOGEiLz48dGV4dCB4PSIyNTYiIHk9IjMyMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1zaXplPSIxNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5HUTwvdGV4dD48L3N2Zz4%3D%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%22%7D%5D%7D">
+    
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
     
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(145deg, #eef2f7, #d9e2ec); min-height: 100vh; padding: 12px; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(145deg, #eef2f7, #d9e2ec); min-height: 100vh; padding: 12px; -webkit-tap-highlight-color: transparent; padding-top: max(12px, env(safe-area-inset-top)); }
         @media (min-width: 768px) { body { padding: 20px; } }
         .app-container { max-width: 1400px; margin: 0 auto; width: 100%; }
         .glass-card { background: rgba(255,255,255,0.96); backdrop-filter: blur(2px); border-radius: 28px; box-shadow: 0 10px 30px -8px rgba(0,0,0,0.15); padding: 20px; margin-bottom: 20px; }
@@ -27,12 +30,15 @@
         .role-badge { padding: 3px 12px; border-radius: 60px; font-size: 0.65rem; font-weight: 500; display: inline-block; margin-top: 4px; width: fit-content; background: #2c7cb6; color: white; }
         .role-badge.operator { background: #e67e22; }
         .role-badge.admin-badge { background: #ffd700; color: #1e3a5f; }
-        .rate-center { background: #e8f0fe; padding: 6px 18px; border-radius: 60px; text-align: center; }
+        .rate-center { background: #e8f0fe; padding: 8px 18px; border-radius: 60px; text-align: center; }
         .rate-label { font-size: 0.6rem; color: #5b6f86; }
         .rate-value { font-size: 1.2rem; font-weight: 800; color: #1e5a8a; }
+        .rate-earned { font-size: 0.75rem; font-weight: 600; color: #2a6b3c; margin-top: 2px; }
         .logout-btn { background: none; border: 1px solid #bacddc; padding: 6px 14px; border-radius: 40px; cursor: pointer; font-weight: 500; color: #2c3e4e; font-size: 0.85rem; transition: all 0.2s; }
         .logout-btn:hover { background: #e74c3c; color: white; border-color: #e74c3c; }
         .logout-btn:active { transform: scale(0.95); }
+        .export-btn { background: #2a6b3c; border: none; color: white; padding: 6px 14px; border-radius: 40px; cursor: pointer; font-weight: 500; font-size: 0.85rem; width: auto; }
+        .export-btn:hover { background: #235530; }
         .form-panel { background: #ffffffdd; border-radius: 24px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .form-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; color: #1f4e79; }
         .input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
@@ -52,6 +58,12 @@
         .stat-card { background: #eef3fc; border-radius: 20px; padding: 14px 12px; text-align: center; }
         .stat-card .value { font-size: 1.5rem; font-weight: 800; color: #1e3a5f; }
         .stat-card .label { font-size: 0.65rem; color: #5b6f86; margin-top: 5px; }
+        .comparison-card { background: #e8f5e9; border-radius: 16px; padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+        .comparison-card .comp-label { font-size: 0.7rem; color: #2e7d32; font-weight: 600; }
+        .comparison-card .comp-value { font-size: 0.95rem; font-weight: 700; }
+        .comparison-card .comp-up { color: #2e7d32; }
+        .comparison-card .comp-down { color: #c62828; }
+        .comparison-card .comp-neutral { color: #5b6f86; }
         .history-section { background: white; border-radius: 24px; padding: 16px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.8rem; min-width: 500px; }
         th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid #e6edf4; }
@@ -79,8 +91,6 @@
         @media (min-width: 480px) { .current-ip-card { flex-direction: row; justify-content: space-between; align-items: center; } }
         .current-ip-value { font-size: 1rem; font-weight: 700; color: #2d5a3d; }
         .change-ip-btn { background: #e2eaf1; color: #4a7c59; padding: 6px 14px; font-size: 0.75rem; border-radius: 30px; width: auto; }
-        .delete-icon { cursor: pointer; color: #b1624b; font-size: 1.1rem; font-weight: bold; padding: 0 6px; transition: color 0.2s; }
-        .delete-icon:hover { color: #e74c3c; }
         .delete-user-btn { background: #b1624b; color: white; padding: 4px 12px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; border: none; }
         .adminDelBtn { background: #b1624b; color: white; padding: 4px 10px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; border: none; }
         .filter-bar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
@@ -90,8 +100,8 @@
         .logo-text { font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: white; }
         .rank-1 { font-weight: 800; color: #d4af37; } .rank-2 { font-weight: 700; color: #6c757d; } .rank-3 { font-weight: 700; color: #cd7f32; }
         .header-actions { display: flex; gap: 8px; align-items: center; }
-        #locationModalOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
-        #locationModalOverlay > div { background: white; border-radius: 32px; padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
+        #locationModalOverlay, #ipModalOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+        #locationModalOverlay > div, #ipModalOverlay > div { background: white; border-radius: 32px; padding: 24px; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; }
         .loading-spinner { text-align: center; padding: 40px; color: #5b6f86; }
         .role-selector { display: flex; gap: 10px; margin-bottom: 16px; }
         .role-option { flex: 1; background: #f3f9ff; border: 2px solid #d9e2ec; padding: 12px; border-radius: 20px; text-align: center; cursor: pointer; font-weight: 600; font-size: 0.9rem; color: #1e3a5f; }
@@ -112,6 +122,9 @@
         .scanner-hint { color: white; text-align: center; margin-top: 12px; font-size: 0.9rem; opacity: 0.8; }
         #closeScannerBtn { margin-top: 16px; background: #e74c3c; width: auto; padding: 12px 36px; font-size: 1rem; cursor: pointer; }
         #closeScannerBtn:hover { background: #c0392b; }
+        .install-banner { display: none; background: #1e5a8a; color: white; text-align: center; padding: 10px 16px; border-radius: 16px; margin-bottom: 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        .install-banner.show { display: block; animation: fadeInUp 0.4s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -124,6 +137,109 @@
 </div>
 
 <script>
+    // ============ PWA Service Worker ============
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+            const CACHE_NAME = 'gqbox-v2';
+            const ASSETS = [
+                './',
+                'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
+                'https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js',
+                'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js'
+            ];
+            self.addEventListener('install', event => {
+                event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => {})));
+                self.skipWaiting();
+            });
+            self.addEventListener('activate', event => {
+                event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))));
+                self.clients.claim();
+            });
+            self.addEventListener('fetch', event => {
+                if (event.request.method !== 'GET') return;
+                event.respondWith(
+                    caches.match(event.request).then(cached => {
+                        const fetched = fetch(event.request).then(response => {
+                            if (response && response.status === 200) {
+                                const clone = response.clone();
+                                caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                            }
+                            return response;
+                        }).catch(() => cached);
+                        return cached || fetched;
+                    })
+                );
+            });
+        `;
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swUrl).then(() => console.log('SW registered')).catch(() => console.log('SW registration skipped'));
+        
+        // Показываем баннер установки
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window._deferredPrompt = e;
+            const banner = document.getElementById('installBanner');
+            if (banner) {
+                banner.classList.add('show');
+                banner.onclick = async () => {
+                    banner.classList.remove('show');
+                    e.prompt();
+                    const result = await e.userChoice;
+                    console.log('PWA install:', result.outcome);
+                    window._deferredPrompt = null;
+                };
+            }
+        });
+    }
+    
+    // ============ Звуковой сигнал ============
+    function playBeep(frequency = 800, duration = 0.12, type = 'sine') {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.value = frequency;
+            gain.gain.value = 0.3;
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + duration);
+        } catch(e) { /* Игнорируем ошибки звука */ }
+    }
+    
+    function playSuccessSound() {
+        playBeep(880, 0.1, 'sine');
+        setTimeout(() => playBeep(1100, 0.15, 'sine'), 100);
+    }
+    
+    function playScanSound() {
+        playBeep(660, 0.08, 'square');
+    }
+    
+    // ============ Экспорт в Excel ============
+    function exportToExcel(records, filename = 'export') {
+        const header = 'ИП\tМаркетплейс\tСклад\tАртикул\tКоличество\tСумма (₽)\tДата\n';
+        const rows = records.map(r => {
+            const date = r.dateStr ? r.dateStr.split(',')[0] : '—';
+            return `${r.ip || '—'}\t${r.marketplace || '—'}\t${(r.locationDisplay || '—').replace(/\t/g, ' ')}\t${r.article || '—'}\t${r.quantity}\t${(r.earned || 0).toFixed(2)}\t${date}`;
+        }).join('\n');
+        
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + header + rows], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}_${getTodayStr()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    
+    // ============ Firebase ============
     const firebaseConfig = {
         apiKey: "AIzaSyAWmeGhe0wFrqULYqvnCX4WY9EhuPFEjHs",
         authDomain: "packing23-11afd.firebaseapp.com",
@@ -163,9 +279,21 @@
                 html5QrCode = new Html5Qrcode("scannerView");
                 html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 280, height: 180 } },
                     async (decodedText) => {
+                        // 1. Звуковой сигнал при сканировании
+                        playScanSound();
+                        
                         if(navigator.vibrate) navigator.vibrate(50);
                         const articleInput = document.getElementById('articleInput');
-                        if (articleInput) { articleInput.value = await findBarcode(decodedText.trim()); articleInput.focus(); }
+                        if (articleInput) {
+                            articleInput.value = await findBarcode(decodedText.trim());
+                            
+                            // 2. Автофокус на поле количества после сканирования
+                            const qtyInput = document.getElementById('qtyInput');
+                            if (qtyInput) {
+                                qtyInput.focus();
+                                qtyInput.select();
+                            }
+                        }
                         stopScanner();
                     }, ()=>{}
                 ).then(()=>{
@@ -228,17 +356,12 @@
         if(s.empty) await db.collection('user_locations').add(d); else await db.collection('user_locations').doc(s.docs[0].id).update(d);
     }
     
-    // Сохранение и получение ИП пользователя
-    async function getUserSavedIP(uid){ 
-        const s = await db.collection('user_ip_settings').where('userId','==',uid).get(); 
-        return s.empty ? '' : (s.docs[0].data().ip || ''); 
-    }
+    async function getUserSavedIP(uid){ const s = await db.collection('user_ip_settings').where('userId','==',uid).get(); return s.empty ? '' : (s.docs[0].data().ip || ''); }
     
     async function saveUserIP(uid, ip){
         const s = await db.collection('user_ip_settings').where('userId','==',uid).get();
         const d = { userId:uid, ip:ip, timestamp:Date.now() };
-        if(s.empty) await db.collection('user_ip_settings').add(d); 
-        else await db.collection('user_ip_settings').doc(s.docs[0].id).update(d);
+        if(s.empty) await db.collection('user_ip_settings').add(d); else await db.collection('user_ip_settings').doc(s.docs[0].id).update(d);
     }
     
     async function addRecord(article,qty,uid,uname,mp,ld,lr,ip){
@@ -255,7 +378,6 @@
     }
     
     async function getUserRecords(uid){ const s = await db.collection('pack_records').where('userId','==',uid).orderBy('timestamp','desc').get(); return s.docs.map(d=>({id:d.id,...d.data()})); }
-    async function getUserDayRecords(uid,date){ const s = await db.collection('pack_records').where('userId','==',uid).where('dateOnly','==',date).orderBy('timestamp','desc').get(); return s.docs.map(d=>({id:d.id,...d.data()})); }
     
     async function getUserPeriodStats(uid,period){
         const records = await getUserRecords(uid); const now = new Date(); let start = new Date();
@@ -263,7 +385,45 @@
         else if(period==='week'){ const day=now.getDay(); start.setDate(now.getDate()-(day===0?6:day-1)); start.setHours(0,0,0,0); }
         else if(period==='month') start = new Date(now.getFullYear(),now.getMonth(),1);
         const f = records.filter(r=>{ if(!r.timestamp) return false; const ts = r.timestamp.toDate?r.timestamp.toDate():new Date(r.timestamp); return ts>=start; });
-        return { totalQty: f.reduce((s,r)=>s+r.quantity,0), totalEarned: f.reduce((s,r)=>s+(r.earned||0),0) };
+        return { totalQty: f.reduce((s,r)=>s+r.quantity,0), totalEarned: f.reduce((s,r)=>s+(r.earned||0),0), records: f };
+    }
+    
+    // ============ Сравнение с прошлой сменой ============
+    async function getYesterdayUserStats(uid) {
+        const y = new Date(); y.setDate(y.getDate() - 1);
+        const ds = y.toISOString().slice(0,10);
+        const s = await db.collection('pack_records').where('userId','==',uid).where('dateOnly','==',ds).get();
+        const records = s.docs.map(d => ({ id: d.id, ...d.data() }));
+        return {
+            date: ds,
+            totalQty: records.reduce((s, r) => s + r.quantity, 0),
+            totalEarned: records.reduce((s, r) => s + (r.earned || 0), 0)
+        };
+    }
+    
+    function renderComparison(yesterdayStats, todayStats) {
+        if (yesterdayStats.totalQty === 0) {
+            return `<div class="comparison-card"><span class="comp-label">📊 Вчера данных нет</span><span class="comp-value">Начинаем сегодня!</span></div>`;
+        }
+        const qtyDiff = todayStats.totalQty - yesterdayStats.totalQty;
+        const earnedDiff = todayStats.totalEarned - yesterdayStats.totalEarned;
+        
+        let qtyClass = 'comp-neutral', qtySign = '';
+        let earnedClass = 'comp-neutral', earnedSign = '';
+        
+        if (qtyDiff > 0) { qtyClass = 'comp-up'; qtySign = '+'; }
+        else if (qtyDiff < 0) { qtyClass = 'comp-down'; }
+        
+        if (earnedDiff > 0) { earnedClass = 'comp-up'; earnedSign = '+'; }
+        else if (earnedDiff < 0) { earnedClass = 'comp-down'; }
+        
+        const qtyPercent = yesterdayStats.totalQty > 0 ? ((qtyDiff / yesterdayStats.totalQty) * 100).toFixed(0) : '∞';
+        const earnedPercent = yesterdayStats.totalEarned > 0 ? ((earnedDiff / yesterdayStats.totalEarned) * 100).toFixed(0) : '∞';
+        
+        return `<div class="comparison-card">
+            <div><span class="comp-label">📦 К прошлой смене:</span> <span class="comp-value ${qtyClass}">${qtySign}${qtyDiff} шт. (${qtySign}${qtyPercent}%)</span></div>
+            <div><span class="comp-label">💰 По деньгам:</span> <span class="comp-value ${earnedClass}">${earnedSign}${earnedDiff.toFixed(2)} ₽ (${earnedSign}${earnedPercent}%)</span></div>
+        </div>`;
     }
     
     async function getYesterdayRecords(){ const y=new Date(); y.setDate(y.getDate()-1); const ds=y.toISOString().slice(0,10); const s=await db.collection('pack_records').where('dateOnly','==',ds).get(); return { records: s.docs.map(d=>({id:d.id,...d.data()})), date:ds }; }
@@ -288,20 +448,16 @@
     
     function showIPModal(uid, currentIP, onSave){
         const existing = document.getElementById('ipModalOverlay'); if (existing) existing.remove();
-        const h=`<div id="ipModalOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;"><div style="background:white;border-radius:32px;padding:24px;max-width:400px;width:100%;"><h3 style="margin-bottom:20px;">👤 Выбор ИП</h3><div class="input-field"><label>ИП</label><select id="ipSelectModal"><option value="">-- Без ИП --</option>${IP_LIST.map(ip=>`<option value="${ip}" ${ip===currentIP?'selected':''}>${ip}</option>`).join('')}</select></div><div style="display:flex;gap:12px;margin-top:20px;"><button id="ipSaveBtn" style="flex:1;">✅ Сохранить</button><button id="ipCancelBtn" style="flex:1;background:#b0bed0;">Отмена</button></div></div></div>`;
+        const h=`<div id="ipModalOverlay"><div><h3 style="margin-bottom:20px;">👤 Выбор ИП</h3><div class="input-field"><label>ИП</label><select id="ipSelectModal"><option value="">-- Без ИП --</option>${IP_LIST.map(ip=>`<option value="${ip}" ${ip===currentIP?'selected':''}>${ip}</option>`).join('')}</select></div><div style="display:flex;gap:12px;margin-top:20px;"><button id="ipSaveBtn" style="flex:1;">✅ Сохранить</button><button id="ipCancelBtn" style="flex:1;background:#b0bed0;">Отмена</button></div></div></div>`;
         document.body.insertAdjacentHTML('beforeend',h);
-        document.getElementById('ipSaveBtn').onclick=async()=>{
-            const ip = document.getElementById('ipSelectModal').value;
-            await saveUserIP(uid, ip);
-            document.getElementById('ipModalOverlay')?.remove();
-            onSave(ip);
-        };
+        document.getElementById('ipSaveBtn').onclick=async()=>{ const ip=document.getElementById('ipSelectModal').value; await saveUserIP(uid,ip); document.getElementById('ipModalOverlay')?.remove(); onSave(ip); };
         document.getElementById('ipCancelBtn').onclick=()=>document.getElementById('ipModalOverlay')?.remove();
     }
     
     function renderLogin(){
         return `<div class="app-container"><div class="glass-card" style="max-width:500px;margin:0 auto;">
             <div class="logo-container"><div class="logo-oval"><span class="logo-text">GQ box</span></div></div>
+            <div id="installBanner" class="install-banner">📲 Нажмите, чтобы установить приложение</div>
             <h3 style="text-align:center;margin-bottom:16px;">Вход</h3>
             <div class="input-field" style="margin-bottom:10px;"><label>Логин</label><input id="loginUser" placeholder="Логин"></div>
             <div class="input-field" style="margin-bottom:10px;"><label>Пароль</label><input type="password" id="loginPass" placeholder="Пароль"></div>
@@ -320,17 +476,27 @@
     
     async function renderUserPanel(user){
         const isOp=user.role==='operator';
-        const stats=await getUserRecords(user.id); const todayStats=stats.filter(r=>r.dateOnly===getTodayStr());
-        const todayQty=todayStats.reduce((s,r)=>s+r.quantity,0); const savedLoc=await getUserSavedLocation(user.id);
-        const savedIP = await getUserSavedIP(user.id);
-        const dayStats=await getUserPeriodStats(user.id,'day'); let rate=2.5;
+        const stats=await getUserRecords(user.id);
+        const todayStats=stats.filter(r=>r.dateOnly===getTodayStr());
+        const todayQty=todayStats.reduce((s,r)=>s+r.quantity,0);
+        const todayEarned=todayStats.reduce((s,r)=>s+(r.earned||0),0);
+        const savedLoc=await getUserSavedLocation(user.id);
+        const savedIP=await getUserSavedIP(user.id);
+        const dayStats=await getUserPeriodStats(user.id,'day');
+        let rate=2.5;
         if(todayQty>=3001)rate=3.25; else if(todayQty>=2001)rate=3.0; else if(todayQty>=1001)rate=2.75;
+        
+        // Сравнение с прошлой сменой
+        const yesterdayStats = await getYesterdayUserStats(user.id);
+        const comparisonHtml = renderComparison(yesterdayStats, { totalQty: todayQty, totalEarned: todayEarned });
+        
         const yd=await getYesterdayRecords();const rm=new Map();
         yd.records.forEach(r=>{if(!rm.has(r.userId))rm.set(r.userId,{name:r.userName,totalQty:0,totalSum:0});const s=rm.get(r.userId);s.totalQty+=r.quantity;s.totalSum+=r.earned||0;});
         const rl=Array.from(rm.values());const bq=[...rl].sort((a,b)=>b.totalQty-a.totalQty);const be=[...rl].sort((a,b)=>b.totalSum-a.totalSum);
         const locHtml=savedLoc?`<div class="current-location-card"><div><div style="font-size:0.7rem;">Текущий склад</div><div class="current-location-value">${escapeHtml(savedLoc.marketplace)} — ${escapeHtml(savedLoc.locationDisplay)}</div></div><button id="changeLocationBtn" class="change-location-btn">✏️</button></div>`:`<div class="current-location-card" style="background:#fff3e0;border-left-color:#e67e22;"><div><div style="font-size:0.7rem;">⚠️ Склад не выбран</div><div class="current-location-value">Нажмите "Выбрать"</div></div><button id="changeLocationBtn" class="change-location-btn">📍 Выбрать</button></div>`;
-        const ipHtml=`<div class="current-ip-card"><div><div style="font-size:0.7rem;">Текущий ИП</div><div class="current-ip-value">${savedIP ? savedIP : 'Не выбран'}</div></div><button id="changeIPBtn" class="change-ip-btn">✏️ Сменить ИП</button></div>`;
-        return `<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div class="user-info"><div class="user-greeting">👋 ${escapeHtml(user.name)}</div><div class="role-badge ${isOp?'operator':''}">${isOp?'Оператор':'Упаковщица'}</div></div><div class="rate-center"><div class="rate-label">Ставка</div><div class="rate-value">${rate} ₽/шт</div></div><div class="header-actions"><button id="logoutBtn" class="logout-btn" type="button">🚪 Выйти</button></div></div>
+        const ipHtml=`<div class="current-ip-card"><div><div style="font-size:0.7rem;">Текущий ИП</div><div class="current-ip-value">${savedIP? savedIP:'Не выбран'}</div></div><button id="changeIPBtn" class="change-ip-btn">✏️ Сменить ИП</button></div>`;
+        return `<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div class="user-info"><div class="user-greeting">👋 ${escapeHtml(user.name)}</div><div class="role-badge ${isOp?'operator':''}">${isOp?'Оператор':'Упаковщица'}</div></div><div class="rate-center"><div class="rate-label">Ставка</div><div class="rate-value">${rate} ₽/шт</div><div class="rate-earned">💰 Сегодня: ${todayEarned.toFixed(2)} ₽</div></div><div class="header-actions"><button id="exportBtn" class="export-btn" type="button" title="Экспорт в Excel">📥</button><button id="logoutBtn" class="logout-btn" type="button">🚪</button></div></div>
+        ${comparisonHtml}
         <div class="form-panel"><div class="form-title">📦 Добавить упаковку</div>${locHtml}${ipHtml}
         <div class="input-group">
             <div class="input-field"><label>🏷️ Артикул</label><div class="article-row"><input type="text" id="articleInput" placeholder="Отсканируйте или введите" autocomplete="off"><button id="scanBtn" class="scan-btn" type="button" title="Сканировать штрихкод">📷</button></div></div>
@@ -354,7 +520,7 @@
         const allUsers=[...packers,...operators];
         const uniqueMP=[...new Set(records.map(r=>r.marketplace).filter(Boolean))];
         const uniqueCities=[...new Set(records.map(r=>r.locationDisplay).filter(Boolean))];
-        return `<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div><div class="user-greeting">📋 Админ: ${escapeHtml(user.name)}</div><div class="role-badge admin-badge">Управление</div></div><div class="header-actions"><button id="logoutBtn" class="logout-btn" type="button">🚪 Выйти</button></div></div><div class="summary-card"><span>👥 Упаковщиц: ${packers.length}</span><span>🏭 Операторов: ${operators.length}</span><span>📦 Всего: ${ps.reduce((s,p)=>s+p.totalQuantity,0)} шт.</span><span>💰 Всего: ${ps.reduce((s,p)=>s+p.totalEarned,0).toFixed(2)} руб.</span></div><div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера (${yd.date})</div>${!yd.records.length?'<div>Нет данных</div>':`<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">${bq.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> ${it.totalQty} шт.</li>`).join('')}</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">${be.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> ${it.totalSum.toFixed(2)} руб.</li>`).join('')}</ul></div></div>`}</div><div class="history-section"><strong>🔍 Расширенный фильтр</strong><div class="filter-bar"><div class="input-field"><label>👤 Сотрудник</label><select id="filterEmployeeSelect"><option value="">Все</option>${allUsers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} (${p.role==='operator'?'Оператор':'Упаковщица'})</option>`).join('')}</select></div><div class="input-field"><label>📅 Дата</label><input type="date" id="filterDateInput" value="${today}"></div><div class="input-field"><label>🛍️ МП</label><select id="filterMP"><option value="">Все</option>${uniqueMP.map(mp=>`<option value="${mp}">${mp}</option>`).join('')}</select></div><div class="input-field"><label>📍 Город/Склад</label><select id="filterCity"><option value="">Все</option>${uniqueCities.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div><div class="input-field"><label>🏷️ Артикул</label><input type="text" id="filterArticle" placeholder="Артикул"></div><button id="applyFilterBtn" type="button">🔍 Показать</button></div><div id="filterResultContainer"><div style="padding:20px;text-align:center;">Выберите параметры фильтра</div></div></div><div class="history-section"><strong>👥 Управление пользователями</strong>
+        return `<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div><div class="user-greeting">📋 Админ: ${escapeHtml(user.name)}</div><div class="role-badge admin-badge">Управление</div></div><div class="header-actions"><button id="adminExportBtn" class="export-btn" type="button" title="Экспорт в Excel">📥</button><button id="logoutBtn" class="logout-btn" type="button">🚪</button></div></div><div class="summary-card"><span>👥 Упаковщиц: ${packers.length}</span><span>🏭 Операторов: ${operators.length}</span><span>📦 Всего: ${ps.reduce((s,p)=>s+p.totalQuantity,0)} шт.</span><span>💰 Всего: ${ps.reduce((s,p)=>s+p.totalEarned,0).toFixed(2)} руб.</span></div><div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера (${yd.date})</div>${!yd.records.length?'<div>Нет данных</div>':`<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">${bq.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> ${it.totalQty} шт.</li>`).join('')}</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">${be.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> ${it.totalSum.toFixed(2)} руб.</li>`).join('')}</ul></div></div>`}</div><div class="history-section"><strong>🔍 Расширенный фильтр</strong><div class="filter-bar"><div class="input-field"><label>👤 Сотрудник</label><select id="filterEmployeeSelect"><option value="">Все</option>${allUsers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} (${p.role==='operator'?'Оператор':'Упаковщица'})</option>`).join('')}</select></div><div class="input-field"><label>📅 Дата</label><input type="date" id="filterDateInput" value="${today}"></div><div class="input-field"><label>🛍️ МП</label><select id="filterMP"><option value="">Все</option>${uniqueMP.map(mp=>`<option value="${mp}">${mp}</option>`).join('')}</select></div><div class="input-field"><label>📍 Город/Склад</label><select id="filterCity"><option value="">Все</option>${uniqueCities.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div><div class="input-field"><label>🏷️ Артикул</label><input type="text" id="filterArticle" placeholder="Артикул"></div><button id="applyFilterBtn" type="button">🔍 Показать</button></div><div id="filterResultContainer"><div style="padding:20px;text-align:center;">Выберите параметры фильтра</div></div></div><div class="history-section"><strong>👥 Управление пользователями</strong>
             <div style="overflow-x:auto;"><table><thead><tr><th>Имя</th><th>Логин</th><th>Роль</th><th></th></tr></thead><tbody id="usersTableBody"></tbody></table></div>
             <div id="usersPagination" style="display:flex;gap:6px;justify-content:center;align-items:center;margin-top:12px;flex-wrap:wrap;"></div>
         </div></div></div>`;
@@ -379,7 +545,13 @@
     async function renderApp(){
         const root=document.getElementById("appRoot");if(!root)return;
         const session=getSession();
-        if(!session){root.innerHTML=renderLogin();attachLoginEvents();}
+        if(!session){root.innerHTML=renderLogin();attachLoginEvents();
+            // Показываем баннер установки при наличии
+            setTimeout(() => {
+                const banner = document.getElementById('installBanner');
+                if (banner && window._deferredPrompt) banner.classList.add('show');
+            }, 1000);
+        }
         else{root.innerHTML='<div class="loading-spinner">Загрузка...</div>';try{if(session.role==="admin"){root.innerHTML=await renderAdminPanel(session);attachAdminEvents();loadUsersData();}else{root.innerHTML=await renderUserPanel(session);attachUserEvents();}}catch(e){console.error(e);root.innerHTML=`<div class="glass-card" style="max-width:500px;margin:0 auto;text-align:center;"><h3>Ошибка</h3><p>${e.message}</p><button onclick="clearSession();renderApp();">Назад</button></div>`;}}
     }
     
@@ -402,20 +574,23 @@
         const changeLocationBtn = document.getElementById("changeLocationBtn");
         if (changeLocationBtn) { changeLocationBtn.onclick = function() { showLocationModal(s.id, s.name, () => renderApp()); }; }
         
-        // Кнопка смены ИП
         const changeIPBtn = document.getElementById("changeIPBtn");
-        if (changeIPBtn) {
-            changeIPBtn.onclick = async function() {
-                const currentIP = await getUserSavedIP(s.id);
-                showIPModal(s.id, currentIP, () => renderApp());
-            };
-        }
+        if (changeIPBtn) { changeIPBtn.onclick = async function() { const currentIP = await getUserSavedIP(s.id); showIPModal(s.id, currentIP, () => renderApp()); }; }
         
         const scanBtn = document.getElementById('scanBtn');
         if (scanBtn) { scanBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); if (scanBtn.classList.contains('scanning')) stopScanner(); else startScanner(); }; }
         
         const closeScannerBtn = document.getElementById('closeScannerBtn');
         if (closeScannerBtn) { closeScannerBtn.onclick = function(e) { e.preventDefault(); stopScanner(); }; }
+        
+        // 8. Экспорт в Excel для упаковщиц
+        const exportBtn = document.getElementById('exportBtn');
+        if (exportBtn) {
+            exportBtn.onclick = async function() {
+                const records = await getUserRecords(s.id);
+                exportToExcel(records, `Упаковка_${s.name.replace(/\s/g,'_')}`);
+            };
+        }
         
         document.querySelectorAll(".period-btn").forEach(b=>{ b.onclick = async function() { document.querySelectorAll(".period-btn").forEach(x=>x.classList.remove("active")); b.classList.add("active"); const st = await getUserPeriodStats(s.id, b.dataset.period); const statQty = document.getElementById("statQty"); const statEarned = document.getElementById("statEarned"); if (statQty) statQty.textContent = st.totalQty; if (statEarned) statEarned.textContent = st.totalEarned.toFixed(2); }; });
         
@@ -430,7 +605,13 @@
                 if (!saved) { if (msg) msg.innerHTML = '<div class="error-msg" style="display:block;">❌ Выберите склад</div>'; setTimeout(() => { if (msg) msg.innerHTML = ""; }, 2500); return; }
                 const r = await addRecord(art, qty, s.id, s.name, saved.marketplace, saved.locationDisplay, saved.locationRaw, savedIP);
                 if (msg) { msg.innerHTML = r.success ? `<div class="success-msg" style="display:block;">✅ ${savedIP? savedIP+' | ':''}${saved.marketplace} | ${art.toUpperCase()} x ${qty} шт. | +${r.earned.toFixed(2)} руб.</div>` : `<div class="error-msg" style="display:block;">❌ ${r.error}</div>`; }
-                if (r.success) { document.getElementById("articleInput").value = ""; document.getElementById("qtyInput").value = ""; setTimeout(() => renderApp(), 200); }
+                if (r.success) {
+                    // Звук успешного добавления
+                    playSuccessSound();
+                    document.getElementById("articleInput").value = "";
+                    document.getElementById("qtyInput").value = "";
+                    setTimeout(() => renderApp(), 200);
+                }
                 setTimeout(() => { if (msg) msg.innerHTML = ""; }, 2500);
             };
         }
@@ -444,6 +625,16 @@
     function attachAdminEvents(){
         const logoutBtn = document.getElementById("logoutBtn");
         if (logoutBtn) { logoutBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); stopScanner(); clearSession(); renderApp(); }; }
+        
+        // 8. Экспорт в Excel для админа
+        const adminExportBtn = document.getElementById('adminExportBtn');
+        if (adminExportBtn) {
+            adminExportBtn.onclick = async function() {
+                const all = await db.collection('pack_records').orderBy('timestamp','desc').limit(2000).get();
+                const records = all.docs.map(d => ({ id: d.id, ...d.data() }));
+                exportToExcel(records, 'Все_записи');
+            };
+        }
         
         let currentPage=1,allFilteredRecords=[];const PER_PAGE=25;
         const applyFilterBtn = document.getElementById("applyFilterBtn");
@@ -464,9 +655,11 @@
             const totalPages=Math.ceil(allFilteredRecords.length/PER_PAGE);if(currentPage>totalPages) currentPage=totalPages;if(currentPage<1) currentPage=1;
             const start=(currentPage-1)*PER_PAGE,pageRecords=allFilteredRecords.slice(start,start+PER_PAGE),tq=allFilteredRecords.reduce((s,r)=>s+r.quantity,0),te=allFilteredRecords.reduce((s,r)=>s+(r.earned||0),0);
             let pHtml='';if(totalPages>1){pHtml=`<div style="display:flex;gap:6px;justify-content:center;align-items:center;margin-top:12px;"><button class="page-btn" data-page="1" ${currentPage===1?'disabled':''} type="button">««</button><button class="page-btn" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} type="button">«</button><span style="font-size:0.8rem;padding:0 8px;">Стр. ${currentPage} из ${totalPages}</span><button class="page-btn" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} type="button">»</button><button class="page-btn" data-page="${totalPages}" ${currentPage===totalPages?'disabled':''} type="button">»»</button></div>`;}
-            container.innerHTML=`<div class="summary-card"><span>📦 <strong>${tq} шт.</strong></span><span>💰 <strong>${te.toFixed(2)} руб.</strong></span><span>📋 Всего: ${allFilteredRecords.length}</span><span>👥 Сотрудников: ${new Set(allFilteredRecords.map(r=>r.userId)).size}</span>${totalPages>1?`<span>📄 Стр. ${currentPage}/${totalPages}</span>`:''}</div><div style="overflow-x:auto;"><table><thead><tr><th>ИП</th><th>МП</th><th>Склад</th><th>Артикул</th><th>Кол-во</th><th>₽</th><th>Сотрудник</th><th></th></tr></thead><tbody>${pageRecords.map(r=>`<tr><td>${r.ip?`<span class="ip-badge ip-${r.ip}">${r.ip}</span>`:'—'}</td><td><span class="marketplace-badge ${r.marketplace==='WB'?'badge-wb':'badge-ozon'}">${r.marketplace}</span></td><td>${escapeHtml(r.locationDisplay||'—')}</td><td><strong>${escapeHtml(r.article)}</strong></td><td>${r.quantity}</td><td>${(r.earned||0).toFixed(2)}</td><td>${escapeHtml(r.userName)}</td><td><button class="adminDelBtn" data-id="${r.id}" type="button">🗑️</button></td></tr>`).join('')}</tbody></table></div>${pHtml}`;
+            container.innerHTML=`<div class="summary-card"><span>📦 <strong>${tq} шт.</strong></span><span>💰 <strong>${te.toFixed(2)} руб.</strong></span><span>📋 Всего: ${allFilteredRecords.length}</span><span>👥 Сотрудников: ${new Set(allFilteredRecords.map(r=>r.userId)).size}</span>${totalPages>1?`<span>📄 Стр. ${currentPage}/${totalPages}</span>`:''}<button id="exportFilteredBtn" class="page-btn" style="margin-left:auto;" type="button">📥 Экспорт</button></div><div style="overflow-x:auto;"><table><thead><tr><th>ИП</th><th>МП</th><th>Склад</th><th>Артикул</th><th>Кол-во</th><th>₽</th><th>Сотрудник</th><th></th></tr></thead><tbody>${pageRecords.map(r=>`<tr><td>${r.ip?`<span class="ip-badge ip-${r.ip}">${r.ip}</span>`:'—'}</td><td><span class="marketplace-badge ${r.marketplace==='WB'?'badge-wb':'badge-ozon'}">${r.marketplace}</span></td><td>${escapeHtml(r.locationDisplay||'—')}</td><td><strong>${escapeHtml(r.article)}</strong></td><td>${r.quantity}</td><td>${(r.earned||0).toFixed(2)}</td><td>${escapeHtml(r.userName)}</td><td><button class="adminDelBtn" data-id="${r.id}" type="button">🗑️</button></td></tr>`).join('')}</tbody></table></div>${pHtml}`;
             container.querySelectorAll(".adminDelBtn").forEach(b=>{b.onclick=async function(){if(b.dataset.id&&confirm("Удалить запись?")){await deleteRecord(b.dataset.id);allFilteredRecords=allFilteredRecords.filter(r=>r.id!==b.dataset.id);const tp=Math.ceil(allFilteredRecords.length/PER_PAGE);if(currentPage>tp) currentPage=Math.max(1,tp);renderPage(container);}};});
             container.querySelectorAll(".page-btn:not([disabled])").forEach(b=>{b.onclick=function(){const page=parseInt(b.dataset.page);if(page>=1&&page<=totalPages&&page!==currentPage){currentPage=page;renderPage(container);}};});
+            const exportFilteredBtn = container.querySelector('#exportFilteredBtn');
+            if (exportFilteredBtn) { exportFilteredBtn.onclick = () => exportToExcel(allFilteredRecords, 'Отфильтрованные_записи'); }
         }
     }
     

@@ -5,11 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1e5a8a">
     <title>GQ Box | Упаковка WB/OZON</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22GQ%20Box%20%E2%80%94%20%D0%A3%D0%BF%D0%B0%D0%BA%D0%BE%D0%B2%D0%BA%D0%B0%22%2C%22short_name%22%3A%22GQ%20Box%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231e5a8a%22%2C%22theme_color%22%3A%22%231e5a8a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMTkyIDE5MiI%2BPHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIHJ4PSI0MCIgZmlsbD0iIzFlNWE4YSIvPjx0ZXh0IHg9Ijk2IiB5PSIxMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtc2l6ZT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5HUTwvdGV4dD48L3N2Zz4%3D%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%22%7D%2C%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgNTEyIDUxMiI%2BPHJlY3Qgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHJ4PSIxMDAiIGZpbGw9IiMxZTVhOGEiLz48dGV4dCB4PSIyNTYiIHk9IjMyMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1zaXplPSIxNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5HUTwvdGV4dD48L3N2Zz4%3D%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%22%7D%5D%7D">
+    
+    <!-- Apple touch icon -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMTkyIDE5MiI+PHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIHJ4PSI0MCIgZmlsbD0iIzFlNWE4YSIvPjx0ZXh0IHg9Ijk2IiB5PSIxMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtc2l6ZT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5HUTwvdGV4dD48L3N2Zz4=">
     
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
@@ -122,8 +126,12 @@
         .scanner-hint { color: white; text-align: center; margin-top: 12px; font-size: 0.9rem; opacity: 0.8; }
         #closeScannerBtn { margin-top: 16px; background: #e74c3c; width: auto; padding: 12px 36px; font-size: 1rem; cursor: pointer; }
         #closeScannerBtn:hover { background: #c0392b; }
-        .install-banner { display: none; background: #1e5a8a; color: white; text-align: center; padding: 10px 16px; border-radius: 16px; margin-bottom: 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
-        .install-banner.show { display: block; animation: fadeInUp 0.4s ease; }
+        .install-banner { display: none; background: #1e5a8a; color: white; text-align: center; padding: 12px 16px; border-radius: 16px; margin-bottom: 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; align-items: center; justify-content: center; gap: 8px; }
+        .install-banner.show { display: flex; animation: fadeInUp 0.4s ease; }
+        .install-banner .close-banner { margin-left: 8px; background: rgba(255,255,255,0.2); border: none; color: white; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: 0.8rem; padding: 0; line-height: 24px; flex-shrink: 0; }
+        /* Показываем инструкцию для iOS */
+        .ios-install-hint { display: none; background: #fff3e0; border: 1px solid #e67e22; border-radius: 16px; padding: 12px 16px; margin-bottom: 12px; font-size: 0.8rem; color: #e65100; text-align: center; }
+        .ios-install-hint.show { display: block; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -137,10 +145,25 @@
 </div>
 
 <script>
+    // ============ Проверка: уже установлен как PWA? ============
+    function isPWA() {
+        return window.matchMedia('(display-mode: standalone)').matches 
+            || navigator.standalone 
+            || document.referrer.includes('android-app://');
+    }
+    
+    // ============ Определение ОС для подсказок ============
+    function getOS() {
+        const ua = navigator.userAgent;
+        if (/iPhone|iPad|iPod/.test(ua)) return 'ios';
+        if (/Android/.test(ua)) return 'android';
+        return 'other';
+    }
+    
     // ============ PWA Service Worker ============
     if ('serviceWorker' in navigator) {
         const swCode = `
-            const CACHE_NAME = 'gqbox-v2';
+            const CACHE_NAME = 'gqbox-v3';
             const ASSETS = [
                 './',
                 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js',
@@ -173,25 +196,105 @@
         `;
         const swBlob = new Blob([swCode], { type: 'application/javascript' });
         const swUrl = URL.createObjectURL(swBlob);
-        navigator.serviceWorker.register(swUrl).then(() => console.log('SW registered')).catch(() => console.log('SW registration skipped'));
+        navigator.serviceWorker.register(swUrl).then(reg => {
+            console.log('SW registered');
+            
+            // Проверяем обновления SW
+            reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // Есть обновление
+                        console.log('New version available');
+                    }
+                });
+            });
+        }).catch(err => console.log('SW registration:', err));
+    }
+    
+    // ============ Установка PWA ============
+    function showInstallPrompt() {
+        // Уже в PWA-режиме — не показываем
+        if (isPWA()) return;
         
-        // Показываем баннер установки
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            window._deferredPrompt = e;
-            const banner = document.getElementById('installBanner');
+        // Уже показывали сегодня — не беспокоим
+        const lastShown = localStorage.getItem('pwa_prompt_date');
+        const today = getTodayStr();
+        if (lastShown === today) return;
+        
+        const os = getOS();
+        const banner = document.getElementById('installBanner');
+        const iosHint = document.getElementById('iosInstallHint');
+        
+        if (os === 'ios') {
+            // На iOS показываем инструкцию
+            if (iosHint) {
+                iosHint.innerHTML = '📲 <strong>Установите как приложение:</strong> нажмите кнопку <strong>Поделиться</strong> (квадрат со стрелкой в Safari), затем <strong>«На экран Домой»</strong>';
+                iosHint.classList.add('show');
+                // Автоскрытие через 15 секунд
+                setTimeout(() => { if (iosHint) iosHint.classList.remove('show'); }, 15000);
+            }
+            localStorage.setItem('pwa_prompt_date', today);
+        } else if (os === 'android' && window._deferredPrompt) {
+            // Android с поддержкой beforeinstallprompt
             if (banner) {
+                banner.innerHTML = '📲 <span>Установить как приложение</span><button class="close-banner" id="closeInstallBanner">✕</button>';
                 banner.classList.add('show');
-                banner.onclick = async () => {
-                    banner.classList.remove('show');
-                    e.prompt();
-                    const result = await e.userChoice;
+                
+                banner.onclick = async (e) => {
+                    if (e.target.id === 'closeInstallBanner') {
+                        banner.classList.remove('show');
+                        localStorage.setItem('pwa_prompt_date', today);
+                        return;
+                    }
+                    window._deferredPrompt.prompt();
+                    const result = await window._deferredPrompt.userChoice;
                     console.log('PWA install:', result.outcome);
                     window._deferredPrompt = null;
+                    banner.classList.remove('show');
+                    localStorage.setItem('pwa_prompt_date', today);
                 };
             }
-        });
+        } else if (os === 'android') {
+            // Android без beforeinstallprompt — показываем инструкцию
+            if (banner) {
+                banner.innerHTML = '📲 <span>Нажмите ⋮ в Chrome → «Добавить на главный экран»</span><button class="close-banner" id="closeInstallBanner">✕</button>';
+                banner.classList.add('show');
+                
+                banner.onclick = (e) => {
+                    if (e.target.id === 'closeInstallBanner') {
+                        banner.classList.remove('show');
+                        localStorage.setItem('pwa_prompt_date', today);
+                    }
+                };
+                
+                setTimeout(() => { if (banner) banner.classList.remove('show'); }, 15000);
+            }
+        }
     }
+    
+    // Слушаем beforeinstallprompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        window._deferredPrompt = e;
+        console.log('beforeinstallprompt fired');
+        showInstallPrompt();
+    });
+    
+    // Если beforeinstallprompt не сработал, показываем через 3 секунды
+    setTimeout(() => {
+        if (!window._deferredPrompt && !isPWA()) {
+            showInstallPrompt();
+        }
+    }, 3000);
+    
+    // Показываем при входе в систему
+    window.addEventListener('appinstalled', () => {
+        console.log('PWA installed');
+        window._deferredPrompt = null;
+        const banner = document.getElementById('installBanner');
+        if (banner) banner.classList.remove('show');
+    });
     
     // ============ Звуковой сигнал ============
     function playBeep(frequency = 800, duration = 0.12, type = 'sine') {
@@ -207,17 +310,11 @@
             gain.connect(ctx.destination);
             osc.start();
             osc.stop(ctx.currentTime + duration);
-        } catch(e) { /* Игнорируем ошибки звука */ }
+        } catch(e) {}
     }
     
-    function playSuccessSound() {
-        playBeep(880, 0.1, 'sine');
-        setTimeout(() => playBeep(1100, 0.15, 'sine'), 100);
-    }
-    
-    function playScanSound() {
-        playBeep(660, 0.08, 'square');
-    }
+    function playSuccessSound() { playBeep(880, 0.1, 'sine'); setTimeout(() => playBeep(1100, 0.15, 'sine'), 100); }
+    function playScanSound() { playBeep(660, 0.08, 'square'); }
     
     // ============ Экспорт в Excel ============
     function exportToExcel(records, filename = 'export') {
@@ -226,16 +323,12 @@
             const date = r.dateStr ? r.dateStr.split(',')[0] : '—';
             return `${r.ip || '—'}\t${r.marketplace || '—'}\t${(r.locationDisplay || '—').replace(/\t/g, ' ')}\t${r.article || '—'}\t${r.quantity}\t${(r.earned || 0).toFixed(2)}\t${date}`;
         }).join('\n');
-        
         const BOM = '\uFEFF';
         const blob = new Blob([BOM + header + rows], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `${filename}_${getTodayStr()}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        a.href = url; a.download = `${filename}_${getTodayStr()}.csv`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
         URL.revokeObjectURL(url);
     }
     
@@ -279,20 +372,13 @@
                 html5QrCode = new Html5Qrcode("scannerView");
                 html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 280, height: 180 } },
                     async (decodedText) => {
-                        // 1. Звуковой сигнал при сканировании
                         playScanSound();
-                        
                         if(navigator.vibrate) navigator.vibrate(50);
                         const articleInput = document.getElementById('articleInput');
                         if (articleInput) {
                             articleInput.value = await findBarcode(decodedText.trim());
-                            
-                            // 2. Автофокус на поле количества после сканирования
                             const qtyInput = document.getElementById('qtyInput');
-                            if (qtyInput) {
-                                qtyInput.focus();
-                                qtyInput.select();
-                            }
+                            if (qtyInput) { qtyInput.focus(); qtyInput.select(); }
                         }
                         stopScanner();
                     }, ()=>{}
@@ -314,7 +400,6 @@
     async function createInitialEmployees() {
         await db.collection('employees').add({ login: 'safonova', password: 'admin0111', name: 'Сафонова Е.', role: 'admin' });
         await db.collection('employees').add({ login: 'sazonov', password: 'admin123', name: 'Sazonov', role: 'admin' });
-        await new Promise(r => setTimeout(r, 1500));
     }
     
     async function getEmployees() {
@@ -349,15 +434,12 @@
     }
     
     async function getUserSavedLocation(uid){ const s = await db.collection('user_locations').where('userId','==',uid).get(); return s.empty ? null : s.docs[0].data(); }
-    
     async function saveUserLocation(uid,mp,ld,lr){
         const s = await db.collection('user_locations').where('userId','==',uid).get();
         const d = { userId:uid, marketplace:mp, locationDisplay:ld, locationRaw:lr, timestamp:Date.now() };
         if(s.empty) await db.collection('user_locations').add(d); else await db.collection('user_locations').doc(s.docs[0].id).update(d);
     }
-    
     async function getUserSavedIP(uid){ const s = await db.collection('user_ip_settings').where('userId','==',uid).get(); return s.empty ? '' : (s.docs[0].data().ip || ''); }
-    
     async function saveUserIP(uid, ip){
         const s = await db.collection('user_ip_settings').where('userId','==',uid).get();
         const d = { userId:uid, ip:ip, timestamp:Date.now() };
@@ -388,42 +470,23 @@
         return { totalQty: f.reduce((s,r)=>s+r.quantity,0), totalEarned: f.reduce((s,r)=>s+(r.earned||0),0), records: f };
     }
     
-    // ============ Сравнение с прошлой сменой ============
     async function getYesterdayUserStats(uid) {
         const y = new Date(); y.setDate(y.getDate() - 1);
         const ds = y.toISOString().slice(0,10);
         const s = await db.collection('pack_records').where('userId','==',uid).where('dateOnly','==',ds).get();
         const records = s.docs.map(d => ({ id: d.id, ...d.data() }));
-        return {
-            date: ds,
-            totalQty: records.reduce((s, r) => s + r.quantity, 0),
-            totalEarned: records.reduce((s, r) => s + (r.earned || 0), 0)
-        };
+        return { date: ds, totalQty: records.reduce((s, r) => s + r.quantity, 0), totalEarned: records.reduce((s, r) => s + (r.earned || 0), 0) };
     }
     
-    function renderComparison(yesterdayStats, todayStats) {
-        if (yesterdayStats.totalQty === 0) {
-            return `<div class="comparison-card"><span class="comp-label">📊 Вчера данных нет</span><span class="comp-value">Начинаем сегодня!</span></div>`;
-        }
-        const qtyDiff = todayStats.totalQty - yesterdayStats.totalQty;
-        const earnedDiff = todayStats.totalEarned - yesterdayStats.totalEarned;
-        
-        let qtyClass = 'comp-neutral', qtySign = '';
-        let earnedClass = 'comp-neutral', earnedSign = '';
-        
-        if (qtyDiff > 0) { qtyClass = 'comp-up'; qtySign = '+'; }
-        else if (qtyDiff < 0) { qtyClass = 'comp-down'; }
-        
-        if (earnedDiff > 0) { earnedClass = 'comp-up'; earnedSign = '+'; }
-        else if (earnedDiff < 0) { earnedClass = 'comp-down'; }
-        
-        const qtyPercent = yesterdayStats.totalQty > 0 ? ((qtyDiff / yesterdayStats.totalQty) * 100).toFixed(0) : '∞';
-        const earnedPercent = yesterdayStats.totalEarned > 0 ? ((earnedDiff / yesterdayStats.totalEarned) * 100).toFixed(0) : '∞';
-        
-        return `<div class="comparison-card">
-            <div><span class="comp-label">📦 К прошлой смене:</span> <span class="comp-value ${qtyClass}">${qtySign}${qtyDiff} шт. (${qtySign}${qtyPercent}%)</span></div>
-            <div><span class="comp-label">💰 По деньгам:</span> <span class="comp-value ${earnedClass}">${earnedSign}${earnedDiff.toFixed(2)} ₽ (${earnedSign}${earnedPercent}%)</span></div>
-        </div>`;
+    function renderComparison(ys, ts) {
+        if (ys.totalQty === 0) return `<div class="comparison-card"><span class="comp-label">📊 Вчера данных нет</span><span class="comp-value">Начинаем сегодня!</span></div>`;
+        const qd = ts.totalQty - ys.totalQty, ed = ts.totalEarned - ys.totalEarned;
+        let qc = 'comp-neutral', qs = '', ec = 'comp-neutral', es = '';
+        if (qd > 0) { qc = 'comp-up'; qs = '+'; } else if (qd < 0) { qc = 'comp-down'; }
+        if (ed > 0) { ec = 'comp-up'; es = '+'; } else if (ed < 0) { ec = 'comp-down'; }
+        const qp = ys.totalQty > 0 ? ((qd / ys.totalQty) * 100).toFixed(0) : '∞';
+        const ep = ys.totalEarned > 0 ? ((ed / ys.totalEarned) * 100).toFixed(0) : '∞';
+        return `<div class="comparison-card"><div><span class="comp-label">📦 К прошлой смене:</span> <span class="comp-value ${qc}">${qs}${qd} шт. (${qs}${qp}%)</span></div><div><span class="comp-label">💰 По деньгам:</span> <span class="comp-value ${ec}">${es}${ed.toFixed(2)} ₽ (${es}${ep}%)</span></div></div>`;
     }
     
     async function getYesterdayRecords(){ const y=new Date(); y.setDate(y.getDate()-1); const ds=y.toISOString().slice(0,10); const s=await db.collection('pack_records').where('dateOnly','==',ds).get(); return { records: s.docs.map(d=>({id:d.id,...d.data()})), date:ds }; }
@@ -457,7 +520,8 @@
     function renderLogin(){
         return `<div class="app-container"><div class="glass-card" style="max-width:500px;margin:0 auto;">
             <div class="logo-container"><div class="logo-oval"><span class="logo-text">GQ box</span></div></div>
-            <div id="installBanner" class="install-banner">📲 Нажмите, чтобы установить приложение</div>
+            <div id="installBanner" class="install-banner"></div>
+            <div id="iosInstallHint" class="ios-install-hint"></div>
             <h3 style="text-align:center;margin-bottom:16px;">Вход</h3>
             <div class="input-field" style="margin-bottom:10px;"><label>Логин</label><input id="loginUser" placeholder="Логин"></div>
             <div class="input-field" style="margin-bottom:10px;"><label>Пароль</label><input type="password" id="loginPass" placeholder="Пароль"></div>
@@ -485,11 +549,8 @@
         const dayStats=await getUserPeriodStats(user.id,'day');
         let rate=2.5;
         if(todayQty>=3001)rate=3.25; else if(todayQty>=2001)rate=3.0; else if(todayQty>=1001)rate=2.75;
-        
-        // Сравнение с прошлой сменой
         const yesterdayStats = await getYesterdayUserStats(user.id);
         const comparisonHtml = renderComparison(yesterdayStats, { totalQty: todayQty, totalEarned: todayEarned });
-        
         const yd=await getYesterdayRecords();const rm=new Map();
         yd.records.forEach(r=>{if(!rm.has(r.userId))rm.set(r.userId,{name:r.userName,totalQty:0,totalSum:0});const s=rm.get(r.userId);s.totalQty+=r.quantity;s.totalSum+=r.earned||0;});
         const rl=Array.from(rm.values());const bq=[...rl].sort((a,b)=>b.totalQty-a.totalQty);const be=[...rl].sort((a,b)=>b.totalSum-a.totalSum);
@@ -497,6 +558,7 @@
         const ipHtml=`<div class="current-ip-card"><div><div style="font-size:0.7rem;">Текущий ИП</div><div class="current-ip-value">${savedIP? savedIP:'Не выбран'}</div></div><button id="changeIPBtn" class="change-ip-btn">✏️ Сменить ИП</button></div>`;
         return `<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div class="user-info"><div class="user-greeting">👋 ${escapeHtml(user.name)}</div><div class="role-badge ${isOp?'operator':''}">${isOp?'Оператор':'Упаковщица'}</div></div><div class="rate-center"><div class="rate-label">Ставка</div><div class="rate-value">${rate} ₽/шт</div><div class="rate-earned">💰 Сегодня: ${todayEarned.toFixed(2)} ₽</div></div><div class="header-actions"><button id="exportBtn" class="export-btn" type="button" title="Экспорт в Excel">📥</button><button id="logoutBtn" class="logout-btn" type="button">🚪</button></div></div>
         ${comparisonHtml}
+        <div id="installBanner" class="install-banner"></div>
         <div class="form-panel"><div class="form-title">📦 Добавить упаковку</div>${locHtml}${ipHtml}
         <div class="input-group">
             <div class="input-field"><label>🏷️ Артикул</label><div class="article-row"><input type="text" id="articleInput" placeholder="Отсканируйте или введите" autocomplete="off"><button id="scanBtn" class="scan-btn" type="button" title="Сканировать штрихкод">📷</button></div></div>
@@ -509,6 +571,7 @@
         <div class="history-section"><strong>📋 Моя история</strong>${stats.length===0?'<div style="padding:20px;">Нет записей</div>':`<div style="overflow-x:auto;"><table><thead><tr><th>ИП</th><th>МП</th><th>Склад</th><th>Артикул</th><th>Кол-во</th><th>₽</th><th>Дата</th></tr></thead><tbody>${stats.map(r=>`<tr><td>${r.ip?`<span class="ip-badge ip-${r.ip}">${r.ip}</span>`:'—'}</td><td><span class="marketplace-badge ${r.marketplace==='WB'?'badge-wb':'badge-ozon'}">${r.marketplace}</span></td><td>${escapeHtml(r.locationDisplay||'—')}</td><td><strong>${escapeHtml(r.article)}</strong></td><td>${r.quantity}</td><td>${(r.earned||0).toFixed(2)}</td><td style="font-size:0.7rem;">${r.dateStr?r.dateStr.split(',')[0]:'—'}</td></tr>`).join('')}</tbody></table></div>`}</div></div></div>`;
     }
     
+    // renderAdminPanel без изменений, добавляем installBanner
     async function renderAdminPanel(user){
         const emps=await getEmployees(); const packers=emps.filter(e=>e.role==='packer'); const operators=emps.filter(e=>e.role==='operator');
         const all=await db.collection('pack_records').orderBy('timestamp','desc').get();
@@ -520,7 +583,9 @@
         const allUsers=[...packers,...operators];
         const uniqueMP=[...new Set(records.map(r=>r.marketplace).filter(Boolean))];
         const uniqueCities=[...new Set(records.map(r=>r.locationDisplay).filter(Boolean))];
-        return `<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div><div class="user-greeting">📋 Админ: ${escapeHtml(user.name)}</div><div class="role-badge admin-badge">Управление</div></div><div class="header-actions"><button id="adminExportBtn" class="export-btn" type="button" title="Экспорт в Excel">📥</button><button id="logoutBtn" class="logout-btn" type="button">🚪</button></div></div><div class="summary-card"><span>👥 Упаковщиц: ${packers.length}</span><span>🏭 Операторов: ${operators.length}</span><span>📦 Всего: ${ps.reduce((s,p)=>s+p.totalQuantity,0)} шт.</span><span>💰 Всего: ${ps.reduce((s,p)=>s+p.totalEarned,0).toFixed(2)} руб.</span></div><div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера (${yd.date})</div>${!yd.records.length?'<div>Нет данных</div>':`<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">${bq.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> ${it.totalQty} шт.</li>`).join('')}</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">${be.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> ${it.totalSum.toFixed(2)} руб.</li>`).join('')}</ul></div></div>`}</div><div class="history-section"><strong>🔍 Расширенный фильтр</strong><div class="filter-bar"><div class="input-field"><label>👤 Сотрудник</label><select id="filterEmployeeSelect"><option value="">Все</option>${allUsers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} (${p.role==='operator'?'Оператор':'Упаковщица'})</option>`).join('')}</select></div><div class="input-field"><label>📅 Дата</label><input type="date" id="filterDateInput" value="${today}"></div><div class="input-field"><label>🛍️ МП</label><select id="filterMP"><option value="">Все</option>${uniqueMP.map(mp=>`<option value="${mp}">${mp}</option>`).join('')}</select></div><div class="input-field"><label>📍 Город/Склад</label><select id="filterCity"><option value="">Все</option>${uniqueCities.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div><div class="input-field"><label>🏷️ Артикул</label><input type="text" id="filterArticle" placeholder="Артикул"></div><button id="applyFilterBtn" type="button">🔍 Показать</button></div><div id="filterResultContainer"><div style="padding:20px;text-align:center;">Выберите параметры фильтра</div></div></div><div class="history-section"><strong>👥 Управление пользователями</strong>
+        return `<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div><div class="user-greeting">📋 Админ: ${escapeHtml(user.name)}</div><div class="role-badge admin-badge">Управление</div></div><div class="header-actions"><button id="adminExportBtn" class="export-btn" type="button" title="Экспорт в Excel">📥</button><button id="logoutBtn" class="logout-btn" type="button">🚪</button></div></div>
+        <div id="installBanner" class="install-banner"></div>
+        <div class="summary-card"><span>👥 Упаковщиц: ${packers.length}</span><span>🏭 Операторов: ${operators.length}</span><span>📦 Всего: ${ps.reduce((s,p)=>s+p.totalQuantity,0)} шт.</span><span>💰 Всего: ${ps.reduce((s,p)=>s+p.totalEarned,0).toFixed(2)} руб.</span></div><div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера (${yd.date})</div>${!yd.records.length?'<div>Нет данных</div>':`<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">${bq.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> ${it.totalQty} шт.</li>`).join('')}</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">${be.map((it,i)=>`<li><span class="${i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':''}">${i+1}. ${escapeHtml(it.name)}</span> ${it.totalSum.toFixed(2)} руб.</li>`).join('')}</ul></div></div>`}</div><div class="history-section"><strong>🔍 Расширенный фильтр</strong><div class="filter-bar"><div class="input-field"><label>👤 Сотрудник</label><select id="filterEmployeeSelect"><option value="">Все</option>${allUsers.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} (${p.role==='operator'?'Оператор':'Упаковщица'})</option>`).join('')}</select></div><div class="input-field"><label>📅 Дата</label><input type="date" id="filterDateInput" value="${today}"></div><div class="input-field"><label>🛍️ МП</label><select id="filterMP"><option value="">Все</option>${uniqueMP.map(mp=>`<option value="${mp}">${mp}</option>`).join('')}</select></div><div class="input-field"><label>📍 Город/Склад</label><select id="filterCity"><option value="">Все</option>${uniqueCities.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div><div class="input-field"><label>🏷️ Артикул</label><input type="text" id="filterArticle" placeholder="Артикул"></div><button id="applyFilterBtn" type="button">🔍 Показать</button></div><div id="filterResultContainer"><div style="padding:20px;text-align:center;">Выберите параметры фильтра</div></div></div><div class="history-section"><strong>👥 Управление пользователями</strong>
             <div style="overflow-x:auto;"><table><thead><tr><th>Имя</th><th>Логин</th><th>Роль</th><th></th></tr></thead><tbody id="usersTableBody"></tbody></table></div>
             <div id="usersPagination" style="display:flex;gap:6px;justify-content:center;align-items:center;margin-top:12px;flex-wrap:wrap;"></div>
         </div></div></div>`;
@@ -545,14 +610,10 @@
     async function renderApp(){
         const root=document.getElementById("appRoot");if(!root)return;
         const session=getSession();
-        if(!session){root.innerHTML=renderLogin();attachLoginEvents();
-            // Показываем баннер установки при наличии
-            setTimeout(() => {
-                const banner = document.getElementById('installBanner');
-                if (banner && window._deferredPrompt) banner.classList.add('show');
-            }, 1000);
-        }
+        if(!session){root.innerHTML=renderLogin();attachLoginEvents();}
         else{root.innerHTML='<div class="loading-spinner">Загрузка...</div>';try{if(session.role==="admin"){root.innerHTML=await renderAdminPanel(session);attachAdminEvents();loadUsersData();}else{root.innerHTML=await renderUserPanel(session);attachUserEvents();}}catch(e){console.error(e);root.innerHTML=`<div class="glass-card" style="max-width:500px;margin:0 auto;text-align:center;"><h3>Ошибка</h3><p>${e.message}</p><button onclick="clearSession();renderApp();">Назад</button></div>`;}}
+        // Показываем баннер установки если нужно
+        showInstallPrompt();
     }
     
     function attachLoginEvents(){
@@ -567,57 +628,22 @@
     
     function attachUserEvents(){
         const s=getSession();if(!s)return;
-        
         const logoutBtn = document.getElementById("logoutBtn");
         if (logoutBtn) { logoutBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); stopScanner(); clearSession(); renderApp(); }; }
-        
         const changeLocationBtn = document.getElementById("changeLocationBtn");
         if (changeLocationBtn) { changeLocationBtn.onclick = function() { showLocationModal(s.id, s.name, () => renderApp()); }; }
-        
         const changeIPBtn = document.getElementById("changeIPBtn");
         if (changeIPBtn) { changeIPBtn.onclick = async function() { const currentIP = await getUserSavedIP(s.id); showIPModal(s.id, currentIP, () => renderApp()); }; }
-        
         const scanBtn = document.getElementById('scanBtn');
         if (scanBtn) { scanBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); if (scanBtn.classList.contains('scanning')) stopScanner(); else startScanner(); }; }
-        
         const closeScannerBtn = document.getElementById('closeScannerBtn');
         if (closeScannerBtn) { closeScannerBtn.onclick = function(e) { e.preventDefault(); stopScanner(); }; }
-        
-        // 8. Экспорт в Excel для упаковщиц
         const exportBtn = document.getElementById('exportBtn');
-        if (exportBtn) {
-            exportBtn.onclick = async function() {
-                const records = await getUserRecords(s.id);
-                exportToExcel(records, `Упаковка_${s.name.replace(/\s/g,'_')}`);
-            };
-        }
-        
+        if (exportBtn) { exportBtn.onclick = async function() { const records = await getUserRecords(s.id); exportToExcel(records, `Упаковка_${s.name.replace(/\s/g,'_')}`); }; }
         document.querySelectorAll(".period-btn").forEach(b=>{ b.onclick = async function() { document.querySelectorAll(".period-btn").forEach(x=>x.classList.remove("active")); b.classList.add("active"); const st = await getUserPeriodStats(s.id, b.dataset.period); const statQty = document.getElementById("statQty"); const statEarned = document.getElementById("statEarned"); if (statQty) statQty.textContent = st.totalQty; if (statEarned) statEarned.textContent = st.totalEarned.toFixed(2); }; });
-        
         const addPackBtn = document.getElementById("addPackBtn");
-        if (addPackBtn) {
-            addPackBtn.onclick = async function() {
-                const art = document.getElementById("articleInput")?.value || "";
-                const qty = document.getElementById("qtyInput")?.value || "";
-                const msg = document.getElementById("msgPanel");
-                const saved = await getUserSavedLocation(s.id);
-                const savedIP = await getUserSavedIP(s.id);
-                if (!saved) { if (msg) msg.innerHTML = '<div class="error-msg" style="display:block;">❌ Выберите склад</div>'; setTimeout(() => { if (msg) msg.innerHTML = ""; }, 2500); return; }
-                const r = await addRecord(art, qty, s.id, s.name, saved.marketplace, saved.locationDisplay, saved.locationRaw, savedIP);
-                if (msg) { msg.innerHTML = r.success ? `<div class="success-msg" style="display:block;">✅ ${savedIP? savedIP+' | ':''}${saved.marketplace} | ${art.toUpperCase()} x ${qty} шт. | +${r.earned.toFixed(2)} руб.</div>` : `<div class="error-msg" style="display:block;">❌ ${r.error}</div>`; }
-                if (r.success) {
-                    // Звук успешного добавления
-                    playSuccessSound();
-                    document.getElementById("articleInput").value = "";
-                    document.getElementById("qtyInput").value = "";
-                    setTimeout(() => renderApp(), 200);
-                }
-                setTimeout(() => { if (msg) msg.innerHTML = ""; }, 2500);
-            };
-        }
-        
-        const articleInput = document.getElementById("articleInput");
-        const qtyInput = document.getElementById("qtyInput");
+        if (addPackBtn) { addPackBtn.onclick = async function() { const art = document.getElementById("articleInput")?.value || ""; const qty = document.getElementById("qtyInput")?.value || ""; const msg = document.getElementById("msgPanel"); const saved = await getUserSavedLocation(s.id); const savedIP = await getUserSavedIP(s.id); if (!saved) { if (msg) msg.innerHTML = '<div class="error-msg" style="display:block;">❌ Выберите склад</div>'; setTimeout(() => { if (msg) msg.innerHTML = ""; }, 2500); return; } const r = await addRecord(art, qty, s.id, s.name, saved.marketplace, saved.locationDisplay, saved.locationRaw, savedIP); if (msg) { msg.innerHTML = r.success ? `<div class="success-msg" style="display:block;">✅ ${savedIP? savedIP+' | ':''}${saved.marketplace} | ${art.toUpperCase()} x ${qty} шт. | +${r.earned.toFixed(2)} руб.</div>` : `<div class="error-msg" style="display:block;">❌ ${r.error}</div>`; } if (r.success) { playSuccessSound(); document.getElementById("articleInput").value = ""; document.getElementById("qtyInput").value = ""; setTimeout(() => renderApp(), 200); } setTimeout(() => { if (msg) msg.innerHTML = ""; }, 2500); }; }
+        const articleInput = document.getElementById("articleInput"); const qtyInput = document.getElementById("qtyInput");
         if (articleInput) { articleInput.addEventListener("keypress", function(e) { if (e.key === "Enter") { e.preventDefault(); if (qtyInput) qtyInput.focus(); } }); }
         if (qtyInput) { qtyInput.addEventListener("keypress", function(e) { if (e.key === "Enter") { e.preventDefault(); if (addPackBtn) addPackBtn.click(); } }); }
     }
@@ -625,21 +651,11 @@
     function attachAdminEvents(){
         const logoutBtn = document.getElementById("logoutBtn");
         if (logoutBtn) { logoutBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); stopScanner(); clearSession(); renderApp(); }; }
-        
-        // 8. Экспорт в Excel для админа
         const adminExportBtn = document.getElementById('adminExportBtn');
-        if (adminExportBtn) {
-            adminExportBtn.onclick = async function() {
-                const all = await db.collection('pack_records').orderBy('timestamp','desc').limit(2000).get();
-                const records = all.docs.map(d => ({ id: d.id, ...d.data() }));
-                exportToExcel(records, 'Все_записи');
-            };
-        }
-        
+        if (adminExportBtn) { adminExportBtn.onclick = async function() { const all = await db.collection('pack_records').orderBy('timestamp','desc').limit(2000).get(); const records = all.docs.map(d => ({ id: d.id, ...d.data() })); exportToExcel(records, 'Все_записи'); }; }
         let currentPage=1,allFilteredRecords=[];const PER_PAGE=25;
         const applyFilterBtn = document.getElementById("applyFilterBtn");
         if (applyFilterBtn) { applyFilterBtn.onclick = async function() { currentPage = 1; await loadFilteredData(); }; }
-        
         async function loadFilteredData(){
             const eid=document.getElementById("filterEmployeeSelect")?.value,date=document.getElementById("filterDateInput")?.value,mp=document.getElementById("filterMP")?.value,city=document.getElementById("filterCity")?.value,article=document.getElementById("filterArticle")?.value.trim().toUpperCase(),container=document.getElementById("filterResultContainer");
             let query=db.collection('pack_records');if(eid) query=query.where('userId','==',eid);if(date) query=query.where('dateOnly','==',date);if(mp&&date) query=query.where('marketplace','==',mp);if(city&&date) query=query.where('locationDisplay','==',city);
@@ -657,7 +673,7 @@
             let pHtml='';if(totalPages>1){pHtml=`<div style="display:flex;gap:6px;justify-content:center;align-items:center;margin-top:12px;"><button class="page-btn" data-page="1" ${currentPage===1?'disabled':''} type="button">««</button><button class="page-btn" data-page="${currentPage-1}" ${currentPage===1?'disabled':''} type="button">«</button><span style="font-size:0.8rem;padding:0 8px;">Стр. ${currentPage} из ${totalPages}</span><button class="page-btn" data-page="${currentPage+1}" ${currentPage===totalPages?'disabled':''} type="button">»</button><button class="page-btn" data-page="${totalPages}" ${currentPage===totalPages?'disabled':''} type="button">»»</button></div>`;}
             container.innerHTML=`<div class="summary-card"><span>📦 <strong>${tq} шт.</strong></span><span>💰 <strong>${te.toFixed(2)} руб.</strong></span><span>📋 Всего: ${allFilteredRecords.length}</span><span>👥 Сотрудников: ${new Set(allFilteredRecords.map(r=>r.userId)).size}</span>${totalPages>1?`<span>📄 Стр. ${currentPage}/${totalPages}</span>`:''}<button id="exportFilteredBtn" class="page-btn" style="margin-left:auto;" type="button">📥 Экспорт</button></div><div style="overflow-x:auto;"><table><thead><tr><th>ИП</th><th>МП</th><th>Склад</th><th>Артикул</th><th>Кол-во</th><th>₽</th><th>Сотрудник</th><th></th></tr></thead><tbody>${pageRecords.map(r=>`<tr><td>${r.ip?`<span class="ip-badge ip-${r.ip}">${r.ip}</span>`:'—'}</td><td><span class="marketplace-badge ${r.marketplace==='WB'?'badge-wb':'badge-ozon'}">${r.marketplace}</span></td><td>${escapeHtml(r.locationDisplay||'—')}</td><td><strong>${escapeHtml(r.article)}</strong></td><td>${r.quantity}</td><td>${(r.earned||0).toFixed(2)}</td><td>${escapeHtml(r.userName)}</td><td><button class="adminDelBtn" data-id="${r.id}" type="button">🗑️</button></td></tr>`).join('')}</tbody></table></div>${pHtml}`;
             container.querySelectorAll(".adminDelBtn").forEach(b=>{b.onclick=async function(){if(b.dataset.id&&confirm("Удалить запись?")){await deleteRecord(b.dataset.id);allFilteredRecords=allFilteredRecords.filter(r=>r.id!==b.dataset.id);const tp=Math.ceil(allFilteredRecords.length/PER_PAGE);if(currentPage>tp) currentPage=Math.max(1,tp);renderPage(container);}};});
-            container.querySelectorAll(".page-btn:not([disabled])").forEach(b=>{b.onclick=function(){const page=parseInt(b.dataset.page);if(page>=1&&page<=totalPages&&page!==currentPage){currentPage=page;renderPage(container);}};});
+            container.querySelectorAll(".page-btn:not([disabled])").forEach(b=>{b.onclick=function(){const page=parseInt(b.dataset.page);if(page>=1&&page<=totalPages&&page!==currentUserPage){currentPage=page;renderPage(container);}};});
             const exportFilteredBtn = container.querySelector('#exportFilteredBtn');
             if (exportFilteredBtn) { exportFilteredBtn.onclick = () => exportToExcel(allFilteredRecords, 'Отфильтрованные_записи'); }
         }

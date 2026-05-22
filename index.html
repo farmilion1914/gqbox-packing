@@ -39,6 +39,8 @@
         .logout-btn:active { transform: scale(0.95); }
         .export-btn { background: #2a6b3c; border: none; color: white; padding: 6px 14px; border-radius: 40px; cursor: pointer; font-weight: 500; font-size: 0.85rem; width: auto; }
         .export-btn:hover { background: #235530; }
+        .salary-btn { background: #1e5a8a; border: none; color: white; padding: 6px 14px; border-radius: 40px; cursor: pointer; font-weight: 500; font-size: 0.85rem; width: auto; }
+        .salary-btn:hover { background: #154a70; }
         .form-panel { background: #ffffffdd; border-radius: 24px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .form-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 16px; color: #1f4e79; }
         .input-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
@@ -122,6 +124,10 @@
         .ios-install-hint { display: none; background: #fff3e0; border: 1px solid #e67e22; border-radius: 16px; padding: 12px 16px; margin-bottom: 12px; font-size: 0.8rem; color: #e65100; text-align: center; }
         .ios-install-hint.show { display: block; }
         #pullRefreshIndicator { position: fixed; top: 0; left: 0; width: 100%; text-align: center; padding: 12px; background: #2c7cb6; color: white; z-index: 9999; font-weight: 600; transition: transform 0.3s; transform: translateY(-100%); font-size: 0.9rem; }
+        .salary-result { margin-top: 12px; }
+        .salary-result .salary-row { display: flex; justify-content: space-between; padding: 10px 14px; background: #f8fafd; border-radius: 12px; margin-bottom: 6px; font-size: 0.9rem; }
+        .salary-result .salary-row strong { color: #1e3a5f; }
+        .salary-result .salary-total { background: #e8f0fe; font-weight: 700; font-size: 1rem; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
@@ -137,89 +143,20 @@
 <script>
     // ============ Pull-to-Refresh ============
     (function() {
-        var touchStartY = 0;
-        var pullDown = false;
-        var pullIndicator = null;
-        var refreshing = false;
-        
-        function getIndicator() {
-            if (!pullIndicator) {
-                pullIndicator = document.createElement('div');
-                pullIndicator.id = 'pullRefreshIndicator';
-                pullIndicator.textContent = '🔄 Потяните вниз, чтобы обновить';
-                document.body.appendChild(pullIndicator);
-            }
-            return pullIndicator;
-        }
-        
-        document.addEventListener('touchstart', function(e) {
-            if (refreshing) return;
-            if (window.scrollY <= 5) {
-                touchStartY = e.touches[0].clientY;
-                pullDown = true;
-            }
-        }, { passive: true });
-        
-        document.addEventListener('touchmove', function(e) {
-            if (!pullDown || refreshing) return;
-            var delta = e.touches[0].clientY - touchStartY;
-            if (delta > 60) {
-                var indicator = getIndicator();
-                indicator.textContent = '🔄 Отпустите, чтобы обновить';
-                indicator.style.transform = 'translateY(0)';
-            }
-        }, { passive: true });
-        
-        document.addEventListener('touchend', async function() {
-            if (!pullDown || refreshing) return;
-            var delta = (pullIndicator && pullIndicator.style.transform === 'translateY(0)') ? 1 : 0;
-            pullDown = false;
-            
-            if (!delta && !pullIndicator) return;
-            if (pullIndicator && pullIndicator.style.transform !== 'translateY(0)') return;
-            
-            refreshing = true;
-            var indicator = getIndicator();
-            indicator.textContent = '⏳ Обновление...';
-            indicator.style.transform = 'translateY(0)';
-            
-            try {
-                // Обновляем Service Worker
-                if (navigator.serviceWorker) {
-                    var regs = await navigator.serviceWorker.getRegistrations();
-                    for (var i = 0; i < regs.length; i++) {
-                        try { await regs[i].update(); } catch(e) {}
-                    }
-                }
-                
-                // Очищаем кеш
-                if ('caches' in window) {
-                    var keys = await caches.keys();
-                    for (var j = 0; j < keys.length; j++) {
-                        try { await caches.delete(keys[j]); } catch(e) {}
-                    }
-                }
-            } catch(e) {}
-            
-            indicator.textContent = '✅ Обновлено!';
-            setTimeout(function() {
-                location.reload();
-            }, 300);
-        });
+        var touchStartY = 0, pullDown = false, pullIndicator = null, refreshing = false;
+        function getIndicator() { if (!pullIndicator) { pullIndicator = document.createElement('div'); pullIndicator.id = 'pullRefreshIndicator'; pullIndicator.textContent = '🔄 Потяните вниз, чтобы обновить'; document.body.appendChild(pullIndicator); } return pullIndicator; }
+        document.addEventListener('touchstart', function(e) { if (refreshing) return; if (window.scrollY <= 5) { touchStartY = e.touches[0].clientY; pullDown = true; } }, { passive: true });
+        document.addEventListener('touchmove', function(e) { if (!pullDown || refreshing) return; var delta = e.touches[0].clientY - touchStartY; if (delta > 60) { var indicator = getIndicator(); indicator.textContent = '🔄 Отпустите, чтобы обновить'; indicator.style.transform = 'translateY(0)'; } }, { passive: true });
+        document.addEventListener('touchend', async function() { if (!pullDown || refreshing) return; pullDown = false; if (!pullIndicator || pullIndicator.style.transform !== 'translateY(0)') return; refreshing = true; var indicator = getIndicator(); indicator.textContent = '⏳ Обновление...'; indicator.style.transform = 'translateY(0)'; try { if (navigator.serviceWorker) { var regs = await navigator.serviceWorker.getRegistrations(); for (var i = 0; i < regs.length; i++) { try { await regs[i].update(); } catch(e) {} } } if ('caches' in window) { var keys = await caches.keys(); for (var j = 0; j < keys.length; j++) { try { await caches.delete(keys[j]); } catch(e) {} } } } catch(e) {} indicator.textContent = '✅ Обновлено!'; setTimeout(function() { location.reload(); }, 300); });
     })();
     
     // ============ PWA Service Worker ============
     if ('serviceWorker' in navigator) {
-        var swCode = "const CACHE_NAME='gqbox-packer-v4';const ASSETS=['./','https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js'];self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE_NAME).then(function(c){return c.addAll(ASSETS).catch(function(){})}));self.skipWaiting()});self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE_NAME}).map(function(k){return caches.delete(k)}))}));self.clients.claim()});self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(function(cached){var fetched=fetch(e.request).then(function(response){if(response&&response.status===200){var clone=response.clone();caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,clone)})}return response}).catch(function(){return cached});return cached||fetched}))});";
+        var swCode = "const CACHE_NAME='gqbox-packer-v5';const ASSETS=['./','https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js'];self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE_NAME).then(function(c){return c.addAll(ASSETS).catch(function(){})}));self.skipWaiting()});self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE_NAME}).map(function(k){return caches.delete(k)}))}));self.clients.claim()});self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(function(cached){var fetched=fetch(e.request).then(function(response){if(response&&response.status===200){var clone=response.clone();caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,clone)})}return response}).catch(function(){return cached});return cached||fetched}))});";
         var swBlob = new Blob([swCode], { type: 'application/javascript' });
         var swUrl = URL.createObjectURL(swBlob);
         navigator.serviceWorker.register(swUrl).then(function(){}).catch(function(){});
-        
-        window.addEventListener('beforeinstallprompt', function(e) {
-            e.preventDefault();
-            window._deferredPrompt = e;
-            showInstallPrompt();
-        });
+        window.addEventListener('beforeinstallprompt', function(e) { e.preventDefault(); window._deferredPrompt = e; showInstallPrompt(); });
     }
     
     function isPWA() { return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone || document.referrer.indexOf('android-app://') >= 0; }
@@ -233,12 +170,8 @@
         var os = getOS();
         var banner = document.getElementById('installBanner');
         var iosHint = document.getElementById('iosInstallHint');
-        if (os === 'ios') {
-            if (iosHint) { iosHint.innerHTML = '📲 <strong>Установите как приложение:</strong> нажмите кнопку <strong>Поделиться</strong> в Safari, затем <strong>«На экран Домой»</strong>'; iosHint.classList.add('show'); setTimeout(function() { if (iosHint) iosHint.classList.remove('show'); }, 15000); }
-            localStorage.setItem('pwa_prompt_packer', today);
-        } else if (os === 'android' && window._deferredPrompt) {
-            if (banner) { banner.innerHTML = '📲 <span>Установить как приложение</span><button class="close-banner" id="closeInstallBanner">✕</button>'; banner.classList.add('show'); banner.onclick = function(e) { if (e.target.id === 'closeInstallBanner') { banner.classList.remove('show'); localStorage.setItem('pwa_prompt_packer', today); return; } window._deferredPrompt.prompt(); window._deferredPrompt.userChoice.then(function() { window._deferredPrompt = null; banner.classList.remove('show'); localStorage.setItem('pwa_prompt_packer', today); }); }; }
-        }
+        if (os === 'ios') { if (iosHint) { iosHint.innerHTML = '📲 <strong>Установите как приложение:</strong> нажмите кнопку <strong>Поделиться</strong> в Safari, затем <strong>«На экран Домой»</strong>'; iosHint.classList.add('show'); setTimeout(function() { if (iosHint) iosHint.classList.remove('show'); }, 15000); } localStorage.setItem('pwa_prompt_packer', today); }
+        else if (os === 'android' && window._deferredPrompt) { if (banner) { banner.innerHTML = '📲 <span>Установить как приложение</span><button class="close-banner" id="closeInstallBanner">✕</button>'; banner.classList.add('show'); banner.onclick = function(e) { if (e.target.id === 'closeInstallBanner') { banner.classList.remove('show'); localStorage.setItem('pwa_prompt_packer', today); return; } window._deferredPrompt.prompt(); window._deferredPrompt.userChoice.then(function() { window._deferredPrompt = null; banner.classList.remove('show'); localStorage.setItem('pwa_prompt_packer', today); }); }; } }
     }
     setTimeout(function() { if (!window._deferredPrompt && !isPWA()) showInstallPrompt(); }, 3000);
     window.addEventListener('appinstalled', function() { window._deferredPrompt = null; var b = document.getElementById('installBanner'); if (b) b.classList.remove('show'); });
@@ -255,10 +188,8 @@
         var BOM = '\uFEFF';
         var blob = new Blob([BOM + header + rows], { type: 'text/csv;charset=utf-8;' });
         var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url; a.download = (filename || 'export')+'_'+getTodayStr()+'.csv';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        var a = document.createElement('a'); a.href = url; a.download = (filename || 'export')+'_'+getTodayStr()+'.csv';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
     }
     
     // ============ Firebase ============
@@ -282,128 +213,94 @@
     
     let html5QrCode = null;
     
-    async function findBarcode(barcode) {
-        const clean = barcode.trim();
-        try { const s = await db.collection('barcodes').where('barcode','==',clean).limit(1).get(); if(!s.empty) return s.docs[0].data().article; } catch(e){}
-        return clean;
-    }
+    async function findBarcode(barcode) { const clean = barcode.trim(); try { const s = await db.collection('barcodes').where('barcode','==',clean).limit(1).get(); if(!s.empty) return s.docs[0].data().article; } catch(e){} return clean; }
     
     function startScanner() {
-        const overlay = document.getElementById('scannerOverlay');
-        const view = document.getElementById('scannerView');
+        const overlay = document.getElementById('scannerOverlay'), view = document.getElementById('scannerView');
         if (!overlay || !view) return;
         if (!navigator.mediaDevices?.getUserMedia) { alert('Камера не поддерживается'); return; }
         overlay.classList.add('active'); view.innerHTML = '';
         if(html5QrCode){ html5QrCode.stop().then(function(){ html5QrCode=null; initNewScanner(); }).catch(function(){ html5QrCode=null; initNewScanner(); }); }
         else { initNewScanner(); }
-        function initNewScanner() {
-            try {
-                html5QrCode = new Html5Qrcode("scannerView");
-                html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 280, height: 180 } },
-                    async function(decodedText) {
-                        playScanSound();
-                        if(navigator.vibrate) navigator.vibrate(50);
-                        const articleInput = document.getElementById('articleInput');
-                        if (articleInput) {
-                            articleInput.value = await findBarcode(decodedText.trim());
-                            const qtyInput = document.getElementById('qtyInput');
-                            if (qtyInput) { qtyInput.focus(); qtyInput.select(); }
-                        }
-                        stopScanner();
-                    }, function(){}
-                ).then(function(){
-                    const scanBtn = document.getElementById('scanBtn');
-                    if(scanBtn){ scanBtn.classList.add('scanning'); scanBtn.textContent = '⏹'; scanBtn.title = 'Остановить сканер'; }
-                }).catch(function(){ alert('Ошибка камеры. Проверьте HTTPS и разрешения.'); stopScanner(); });
-            } catch(e) { alert('Не удалось инициализировать сканер'); stopScanner(); }
-        }
+        function initNewScanner() { try { html5QrCode = new Html5Qrcode("scannerView"); html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 280, height: 180 } }, async function(decodedText) { playScanSound(); if(navigator.vibrate) navigator.vibrate(50); const articleInput = document.getElementById('articleInput'); if (articleInput) { articleInput.value = await findBarcode(decodedText.trim()); const qtyInput = document.getElementById('qtyInput'); if (qtyInput) { qtyInput.focus(); qtyInput.select(); } } stopScanner(); }, function(){}).then(function(){ const scanBtn = document.getElementById('scanBtn'); if(scanBtn){ scanBtn.classList.add('scanning'); scanBtn.textContent = '⏹'; scanBtn.title = 'Остановить сканер'; } }).catch(function(){ alert('Ошибка камеры. Проверьте HTTPS и разрешения.'); stopScanner(); }); } catch(e) { alert('Не удалось инициализировать сканер'); stopScanner(); } }
     }
     
-    function stopScanner() {
-        if(html5QrCode){ html5QrCode.stop().catch(function(){}).finally(function(){ html5QrCode=null; }); }
-        const overlay = document.getElementById('scannerOverlay'); if(overlay) overlay.classList.remove('active');
-        const scanBtn = document.getElementById('scanBtn'); if(scanBtn){ scanBtn.classList.remove('scanning'); scanBtn.textContent='📷'; scanBtn.title='Сканировать штрихкод'; }
-        const view = document.getElementById('scannerView'); if(view) view.innerHTML='';
-    }
+    function stopScanner() { if(html5QrCode){ html5QrCode.stop().catch(function(){}).finally(function(){ html5QrCode=null; }); } const overlay = document.getElementById('scannerOverlay'); if(overlay) overlay.classList.remove('active'); const scanBtn = document.getElementById('scanBtn'); if(scanBtn){ scanBtn.classList.remove('scanning'); scanBtn.textContent='📷'; scanBtn.title='Сканировать штрихкод'; } const view = document.getElementById('scannerView'); if(view) view.innerHTML=''; }
     
-    async function createInitialEmployees() {
-        await db.collection('employees').add({ login: 'safonova', password: 'admin0111', name: 'Сафонова Е.', role: 'admin' });
-        await db.collection('employees').add({ login: 'sazonov', password: 'admin123', name: 'Sazonov', role: 'admin' });
-    }
+    async function createInitialEmployees() { await db.collection('employees').add({ login: 'safonova', password: 'admin0111', name: 'Сафонова Е.', role: 'admin' }); await db.collection('employees').add({ login: 'sazonov', password: 'admin123', name: 'Sazonov', role: 'admin' }); }
     
-    async function getEmployees() {
-        const s = await db.collection('employees').orderBy('name').get();
-        let e = s.docs.map(function(d){ return {id:d.id,...d.data()}; });
-        if(!e.length){ await createInitialEmployees(); const s2 = await db.collection('employees').orderBy('name').get(); e = s2.docs.map(function(d){ return {id:d.id,...d.data()}; }); }
-        return e;
-    }
+    async function getEmployees() { const s = await db.collection('employees').orderBy('name').get(); let e = s.docs.map(function(d){ return {id:d.id,...d.data()}; }); if(!e.length){ await createInitialEmployees(); const s2 = await db.collection('employees').orderBy('name').get(); e = s2.docs.map(function(d){ return {id:d.id,...d.data()}; }); } return e; }
     
-    async function loginUser(l,p){
-        const a = await db.collection('employees').get(); if(a.empty) await createInitialEmployees();
-        const s = await db.collection('employees').where('login','==',l).where('password','==',p).get();
-        return s.empty ? null : { id: s.docs[0].id, ...s.docs[0].data() };
-    }
+    async function loginUser(l,p){ const a = await db.collection('employees').get(); if(a.empty) await createInitialEmployees(); const s = await db.collection('employees').where('login','==',l).where('password','==',p).get(); return s.empty ? null : { id: s.docs[0].id, ...s.docs[0].data() }; }
     
-    async function registerUser(l,p,n,r){
-        if(!l||!p||!n||!r) return { success: false, error: 'Заполните все поля' };
-        const s = await db.collection('employees').where('login','==',l).get();
-        if(!s.empty) return { success: false, error: 'Логин уже существует' };
-        await db.collection('employees').add({ login: l.trim(), password: p, name: n.trim(), role: r });
-        return { success: true };
-    }
+    async function registerUser(l,p,n,r){ if(!l||!p||!n||!r) return { success: false, error: 'Заполните все поля' }; const s = await db.collection('employees').where('login','==',l).get(); if(!s.empty) return { success: false, error: 'Логин уже существует' }; await db.collection('employees').add({ login: l.trim(), password: p, name: n.trim(), role: r }); return { success: true }; }
     
-    async function deleteUser(uid){
-        const d = await db.collection('employees').doc(uid).get();
-        if(!d.exists || d.data().role === 'admin') return false;
-        const b = db.batch();
-        (await db.collection('pack_records').where('userId','==',uid).get()).docs.forEach(function(x){ b.delete(x.ref); });
-        (await db.collection('user_locations').where('userId','==',uid).get()).docs.forEach(function(x){ b.delete(x.ref); });
-        (await db.collection('user_ip_settings').where('userId','==',uid).get()).docs.forEach(function(x){ b.delete(x.ref); });
-        b.delete(db.collection('employees').doc(uid)); await b.commit(); return true;
-    }
+    async function deleteUser(uid){ const d = await db.collection('employees').doc(uid).get(); if(!d.exists || d.data().role === 'admin') return false; const b = db.batch(); (await db.collection('pack_records').where('userId','==',uid).get()).docs.forEach(function(x){ b.delete(x.ref); }); (await db.collection('user_locations').where('userId','==',uid).get()).docs.forEach(function(x){ b.delete(x.ref); }); (await db.collection('user_ip_settings').where('userId','==',uid).get()).docs.forEach(function(x){ b.delete(x.ref); }); b.delete(db.collection('employees').doc(uid)); await b.commit(); return true; }
     
     async function getUserSavedLocation(uid){ const s = await db.collection('user_locations').where('userId','==',uid).get(); return s.empty ? null : s.docs[0].data(); }
-    
-    async function saveUserLocation(uid,mp,ld,lr){
-        const s = await db.collection('user_locations').where('userId','==',uid).get();
-        const d = { userId:uid, marketplace:mp, locationDisplay:ld, locationRaw:lr, timestamp:Date.now() };
-        if(s.empty) await db.collection('user_locations').add(d); else await db.collection('user_locations').doc(s.docs[0].id).update(d);
-    }
-    
+    async function saveUserLocation(uid,mp,ld,lr){ const s = await db.collection('user_locations').where('userId','==',uid).get(); const d = { userId:uid, marketplace:mp, locationDisplay:ld, locationRaw:lr, timestamp:Date.now() }; if(s.empty) await db.collection('user_locations').add(d); else await db.collection('user_locations').doc(s.docs[0].id).update(d); }
     async function getUserSavedIP(uid){ const s = await db.collection('user_ip_settings').where('userId','==',uid).get(); return s.empty ? '' : (s.docs[0].data().ip || ''); }
+    async function saveUserIP(uid, ip){ const s = await db.collection('user_ip_settings').where('userId','==',uid).get(); const d = { userId:uid, ip:ip, timestamp:Date.now() }; if(s.empty) await db.collection('user_ip_settings').add(d); else await db.collection('user_ip_settings').doc(s.docs[0].id).update(d); }
     
-    async function saveUserIP(uid, ip){
-        const s = await db.collection('user_ip_settings').where('userId','==',uid).get();
-        const d = { userId:uid, ip:ip, timestamp:Date.now() };
-        if(s.empty) await db.collection('user_ip_settings').add(d); else await db.collection('user_ip_settings').doc(s.docs[0].id).update(d);
-    }
-    
-    async function addRecord(article,qty,uid,uname,mp,ld,lr,ip){
-        if(!article||!mp||!ld) return { success: false, error: 'Заполните все поля' };
-        const q = parseInt(qty); if(isNaN(q)||q<=0) return { success: false, error: 'Количество > 0' };
-        const today = getTodayStr();
-        const tr = await db.collection('pack_records').where('userId','==',uid).where('dateOnly','==',today).get();
-        const at = tr.docs.reduce(function(s,d){ return s+d.data().quantity; },0);
-        let earned=0, rem=q, cq=at;
-        const tiers = [{limit:1000,rate:2.5},{limit:2000,rate:2.75},{limit:3000,rate:3.0},{limit:Infinity,rate:3.25}];
-        for(var i=0; i<tiers.length; i++){ var t=tiers[i]; if(rem<=0)break; if(cq>=t.limit)continue; var av=t.limit-cq; var take=Math.min(rem,av); earned+=take*t.rate; rem-=take; cq+=take; }
-        await db.collection('pack_records').add({ userId:uid, userName:uname, article:article.trim().toUpperCase(), quantity:q, earned, marketplace:mp, locationDisplay:ld, locationRaw:lr||ld, ip:ip||'', timestamp:firebase.firestore.FieldValue.serverTimestamp(), dateStr:new Date().toLocaleString(), dateOnly:today });
-        return { success: true, earned };
-    }
+    async function addRecord(article,qty,uid,uname,mp,ld,lr,ip){ if(!article||!mp||!ld) return { success: false, error: 'Заполните все поля' }; const q = parseInt(qty); if(isNaN(q)||q<=0) return { success: false, error: 'Количество > 0' }; const today = getTodayStr(); const tr = await db.collection('pack_records').where('userId','==',uid).where('dateOnly','==',today).get(); const at = tr.docs.reduce(function(s,d){ return s+d.data().quantity; },0); let earned=0, rem=q, cq=at; const tiers = [{limit:1000,rate:2.5},{limit:2000,rate:2.75},{limit:3000,rate:3.0},{limit:Infinity,rate:3.25}]; for(var i=0; i<tiers.length; i++){ var t=tiers[i]; if(rem<=0)break; if(cq>=t.limit)continue; var av=t.limit-cq; var take=Math.min(rem,av); earned+=take*t.rate; rem-=take; cq+=take; } await db.collection('pack_records').add({ userId:uid, userName:uname, article:article.trim().toUpperCase(), quantity:q, earned, marketplace:mp, locationDisplay:ld, locationRaw:lr||ld, ip:ip||'', timestamp:firebase.firestore.FieldValue.serverTimestamp(), dateStr:new Date().toLocaleString(), dateOnly:today }); return { success: true, earned }; }
     
     async function getUserRecords(uid){ const s = await db.collection('pack_records').where('userId','==',uid).orderBy('timestamp','desc').get(); return s.docs.map(function(d){ return {id:d.id,...d.data()}; }); }
     
-    async function getUserPeriodStats(uid,period){
-        const records = await getUserRecords(uid); const now = new Date(); let start = new Date();
-        if(period==='day') start.setHours(0,0,0,0);
-        else if(period==='week'){ const day=now.getDay(); start.setDate(now.getDate()-(day===0?6:day-1)); start.setHours(0,0,0,0); }
-        else if(period==='month') start = new Date(now.getFullYear(),now.getMonth(),1);
-        const f = records.filter(function(r){ if(!r.timestamp) return false; const ts = r.timestamp.toDate?r.timestamp.toDate():new Date(r.timestamp); return ts>=start; });
-        return { totalQty: f.reduce(function(s,r){ return s+r.quantity; },0), totalEarned: f.reduce(function(s,r){ return s+(r.earned||0); },0), records: f };
-    }
+    async function getUserPeriodStats(uid,period){ const records = await getUserRecords(uid); const now = new Date(); let start = new Date(); if(period==='day') start.setHours(0,0,0,0); else if(period==='week'){ const day=now.getDay(); start.setDate(now.getDate()-(day===0?6:day-1)); start.setHours(0,0,0,0); } else if(period==='month') start = new Date(now.getFullYear(),now.getMonth(),1); const f = records.filter(function(r){ if(!r.timestamp) return false; const ts = r.timestamp.toDate?r.timestamp.toDate():new Date(r.timestamp); return ts>=start; }); return { totalQty: f.reduce(function(s,r){ return s+r.quantity; },0), totalEarned: f.reduce(function(s,r){ return s+(r.earned||0); },0), records: f }; }
     
     async function getYesterdayRecords(){ const y=new Date(); y.setDate(y.getDate()-1); const ds=y.toISOString().slice(0,10); const s=await db.collection('pack_records').where('dateOnly','==',ds).get(); return { records: s.docs.map(function(d){ return {id:d.id,...d.data()}; }), date:ds }; }
     async function deleteRecord(rid){ await db.collection('pack_records').doc(rid).delete(); }
+    
+    // ============ Расчёт зарплаты ============
+    async function calculateSalary(uid, startDate, endDate) {
+        var q = db.collection('pack_records').where('userId','==',uid).where('dateOnly','>=',startDate).where('dateOnly','<=',endDate);
+        var snapshot = await q.orderBy('dateOnly').get();
+        
+        var records = snapshot.docs.map(function(d) { return { id: d.id, ...d.data() }; });
+        
+        // Группируем по дням
+        var byDay = {};
+        records.forEach(function(r) {
+            var day = r.dateOnly;
+            if (!byDay[day]) byDay[day] = { qty: 0, earned: 0 };
+            byDay[day].qty += r.quantity;
+            byDay[day].earned += r.earned || 0;
+        });
+        
+        // Группируем по ИП
+        var byIP = {};
+        records.forEach(function(r) {
+            var ip = r.ip || 'Без ИП';
+            if (!byIP[ip]) byIP[ip] = { qty: 0, earned: 0 };
+            byIP[ip].qty += r.quantity;
+            byIP[ip].earned += r.earned || 0;
+        });
+        
+        // Группируем по маркетплейсу
+        var byMP = {};
+        records.forEach(function(r) {
+            var mp = r.marketplace || '—';
+            if (!byMP[mp]) byMP[mp] = { qty: 0, earned: 0 };
+            byMP[mp].qty += r.quantity;
+            byMP[mp].earned += r.earned || 0;
+        });
+        
+        var totalQty = records.reduce(function(s,r) { return s + r.quantity; }, 0);
+        var totalEarned = records.reduce(function(s,r) { return s + (r.earned || 0); }, 0);
+        var daysWorked = Object.keys(byDay).length;
+        
+        return {
+            records: records,
+            byDay: byDay,
+            byIP: byIP,
+            byMP: byMP,
+            totalQty: totalQty,
+            totalEarned: totalEarned,
+            daysWorked: daysWorked,
+            startDate: startDate,
+            endDate: endDate
+        };
+    }
     
     const SESSION_KEY="gqbox_session";
     function saveSession(u){ localStorage.setItem(SESSION_KEY,JSON.stringify(u)); }
@@ -433,21 +330,17 @@
     function renderLogin(){
         return '<div class="app-container"><div class="glass-card" style="max-width:500px;margin:0 auto;">' +
             '<div class="logo-container"><div class="logo-oval"><span class="logo-text">GQ box</span></div></div>' +
-            '<div id="installBanner" class="install-banner"></div>' +
-            '<div id="iosInstallHint" class="ios-install-hint"></div>' +
+            '<div id="installBanner" class="install-banner"></div><div id="iosInstallHint" class="ios-install-hint"></div>' +
             '<h3 style="text-align:center;margin-bottom:16px;">Вход</h3>' +
             '<div class="input-field" style="margin-bottom:10px;"><label>Логин</label><input id="loginUser" placeholder="Логин"></div>' +
             '<div class="input-field" style="margin-bottom:10px;"><label>Пароль</label><input type="password" id="loginPass" placeholder="Пароль"></div>' +
-            '<button id="doLogin" style="margin-bottom:12px;">Войти</button>' +
-            '<div id="loginError" class="error-msg" style="display:none;"></div>' +
-            '<hr style="margin:16px 0;">' +
-            '<h3 style="text-align:center;font-size:1rem;">Регистрация</h3>' +
+            '<button id="doLogin" style="margin-bottom:12px;">Войти</button><div id="loginError" class="error-msg" style="display:none;"></div>' +
+            '<hr style="margin:16px 0;"><h3 style="text-align:center;font-size:1rem;">Регистрация</h3>' +
             '<div class="input-field" style="margin-top:10px;"><label>Логин</label><input id="regLogin"></div>' +
             '<div class="input-field" style="margin-top:6px;"><label>Пароль</label><input type="password" id="regPass"></div>' +
             '<div class="input-field" style="margin-top:6px;"><label>Имя</label><input id="regName"></div>' +
             '<div style="margin-top:10px;"><label>Роль</label><div class="role-selector"><div class="role-option active" data-role="packer" id="rolePacker">📦 Упаковщица</div><div class="role-option" data-role="operator" id="roleOperator">🏭 Оператор</div></div></div>' +
-            '<button id="doRegister" style="margin-top:8px;background:#4a7c59;">Зарегистрироваться</button>' +
-            '<div id="regError" class="error-msg" style="display:none;margin-top:10px;"></div>' +
+            '<button id="doRegister" style="margin-top:8px;background:#4a7c59;">Зарегистрироваться</button><div id="regError" class="error-msg" style="display:none;margin-top:10px;"></div>' +
         '</div></div>';
     }
     
@@ -467,11 +360,7 @@
         const ipHtml='<div class="current-ip-card"><div><div style="font-size:0.7rem;">Текущий ИП</div><div class="current-ip-value">'+(savedIP ? savedIP : 'Не выбран')+'</div></div><button id="changeIPBtn" class="change-ip-btn">✏️ Сменить ИП</button></div>';
         return '<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div class="user-info"><div class="user-greeting">👋 '+escapeHtml(user.name)+'</div><div class="role-badge '+(isOp?'operator':'')+'">'+(isOp?'Оператор':'Упаковщица')+'</div></div><div class="rate-center"><div class="rate-label">Ставка</div><div class="rate-value">'+rate+' ₽/шт</div><div class="rate-earned">💰 Сегодня: '+todayEarned.toFixed(2)+' ₽</div></div><div class="header-actions"><button id="logoutBtn" class="logout-btn" type="button">🚪 Выйти</button></div></div>' +
         '<div class="form-panel"><div class="form-title">📦 Добавить упаковку</div>'+locHtml+ipHtml+
-        '<div class="input-group">' +
-            '<div class="input-field"><label>🏷️ Артикул</label><div class="article-row"><input type="text" id="articleInput" placeholder="Отсканируйте или введите" autocomplete="off"><button id="scanBtn" class="scan-btn" type="button" title="Сканировать штрихкод">📷</button></div></div>' +
-            '<div class="input-field"><label>🔢 Количество</label><input type="number" id="qtyInput" min="1" placeholder="Введите кол-во"></div>' +
-            '<button id="addPackBtn" type="button">➕ Добавить</button>' +
-        '</div><div id="msgPanel"></div></div>' +
+        '<div class="input-group"><div class="input-field"><label>🏷️ Артикул</label><div class="article-row"><input type="text" id="articleInput" placeholder="Отсканируйте или введите" autocomplete="off"><button id="scanBtn" class="scan-btn" type="button" title="Сканировать штрихкод">📷</button></div></div><div class="input-field"><label>🔢 Количество</label><input type="number" id="qtyInput" min="1" placeholder="Введите кол-во"></div><button id="addPackBtn" type="button">➕ Добавить</button></div><div id="msgPanel"></div></div>' +
         '<div style="display:flex;gap:6px;margin-bottom:12px;"><button class="period-btn active" data-period="day">День</button><button class="period-btn" data-period="week">Неделя</button><button class="period-btn" data-period="month">Месяц</button></div>' +
         '<div class="stats-cards"><div class="stat-card"><div class="value" id="statQty">'+dayStats.totalQty+'</div><div class="label">Упаковано, шт</div></div><div class="stat-card"><div class="value" id="statEarned">'+dayStats.totalEarned.toFixed(2)+'</div><div class="label">Заработано, руб</div></div></div>' +
         '<div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера ('+yd.date+')</div>'+(!yd.records.length?'<div>Нет данных</div>':'<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">'+bq.map(function(it,i){ return '<li><span class="'+(i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'')+'">'+(i+1)+'. '+escapeHtml(it.name)+'</span> <strong>'+it.totalQty+' шт.</strong></li>'; }).join('')+'</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">'+be.map(function(it,i){ return '<li><span class="'+(i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'')+'">'+(i+1)+'. '+escapeHtml(it.name)+'</span> <strong>'+it.totalSum.toFixed(2)+' руб.</strong></li>'; }).join('')+'</ul></div></div>')+'</div>' +
@@ -489,7 +378,24 @@
         const allUsers=[...packers,...operators];
         const uniqueMP=[...new Set(records.map(function(r){ return r.marketplace; }).filter(Boolean))];
         const uniqueCities=[...new Set(records.map(function(r){ return r.locationDisplay; }).filter(Boolean))];
-        return '<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div><div class="user-greeting">📋 Админ: '+escapeHtml(user.name)+'</div><div class="role-badge admin-badge">Управление</div></div><div class="header-actions"><button id="adminExportBtn" class="export-btn" type="button" title="Экспорт в Excel">📥</button><button id="logoutBtn" class="logout-btn" type="button">🚪 Выйти</button></div></div><div class="summary-card"><span>👥 Упаковщиц: '+packers.length+'</span><span>🏭 Операторов: '+operators.length+'</span><span>📦 Всего: '+ps.reduce(function(s,p){ return s+p.totalQuantity; },0)+' шт.</span><span>💰 Всего: '+ps.reduce(function(s,p){ return s+p.totalEarned; },0).toFixed(2)+' руб.</span></div><div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера ('+yd.date+')</div>'+(!yd.records.length?'<div>Нет данных</div>':'<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">'+bq.map(function(it,i){ return '<li><span class="'+(i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'')+'">'+(i+1)+'. '+escapeHtml(it.name)+'</span> '+it.totalQty+' шт.</li>'; }).join('')+'</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">'+be.map(function(it,i){ return '<li><span class="'+(i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'')+'">'+(i+1)+'. '+escapeHtml(it.name)+'</span> '+it.totalSum.toFixed(2)+' руб.</li>'; }).join('')+'</ul></div></div>')+'</div><div class="history-section"><strong>🔍 Расширенный фильтр</strong><div class="filter-bar"><div class="input-field"><label>👤 Сотрудник</label><select id="filterEmployeeSelect"><option value="">Все</option>'+allUsers.map(function(p){ return '<option value="'+p.id+'">'+escapeHtml(p.name)+' ('+(p.role==='operator'?'Оператор':'Упаковщица')+')</option>'; }).join('')+'</select></div><div class="input-field"><label>📅 Дата</label><input type="date" id="filterDateInput" value="'+today+'"></div><div class="input-field"><label>🛍️ МП</label><select id="filterMP"><option value="">Все</option>'+uniqueMP.map(function(mp){ return '<option value="'+mp+'">'+mp+'</option>'; }).join('')+'</select></div><div class="input-field"><label>📍 Город/Склад</label><select id="filterCity"><option value="">Все</option>'+uniqueCities.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('')+'</select></div><div class="input-field"><label>🏷️ Артикул</label><input type="text" id="filterArticle" placeholder="Артикул"></div><button id="applyFilterBtn" type="button">🔍 Показать</button></div><div id="filterResultContainer"><div style="padding:20px;text-align:center;">Выберите параметры фильтра</div></div></div><div class="history-section"><strong>👥 Управление пользователями</strong>' +
+        
+        // Сотрудники для фильтра зарплаты
+        var salaryEmpOptions = allUsers.map(function(p){ return '<option value="'+p.id+'">'+escapeHtml(p.name)+'</option>'; }).join('');
+        
+        return '<div class="app-container"><div class="glass-card dashboard"><div class="header-dash"><div><div class="user-greeting">📋 Админ: '+escapeHtml(user.name)+'</div><div class="role-badge admin-badge">Управление</div></div><div class="header-actions"><button id="adminExportBtn" class="export-btn" type="button" title="Экспорт в Excel">📥</button><button id="logoutBtn" class="logout-btn" type="button">🚪 Выйти</button></div></div><div class="summary-card"><span>👥 Упаковщиц: '+packers.length+'</span><span>🏭 Операторов: '+operators.length+'</span><span>📦 Всего: '+ps.reduce(function(s,p){ return s+p.totalQuantity; },0)+' шт.</span><span>💰 Всего: '+ps.reduce(function(s,p){ return s+p.totalEarned; },0).toFixed(2)+' руб.</span></div><div class="rating-container"><div class="rating-title">🏆 Рейтинг за вчера ('+yd.date+')</div>'+(!yd.records.length?'<div>Нет данных</div>':'<div class="rating-grid"><div class="rating-card"><h4>📊 По количеству</h4><ul class="rating-list">'+bq.map(function(it,i){ return '<li><span class="'+(i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'')+'">'+(i+1)+'. '+escapeHtml(it.name)+'</span> '+it.totalQty+' шт.</li>'; }).join('')+'</ul></div><div class="rating-card"><h4>💰 По сумме</h4><ul class="rating-list">'+be.map(function(it,i){ return '<li><span class="'+(i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'')+'">'+(i+1)+'. '+escapeHtml(it.name)+'</span> '+it.totalSum.toFixed(2)+' руб.</li>'; }).join('')+'</ul></div></div>')+'</div>' +
+        
+        // Блок зарплаты
+        '<div class="history-section"><strong>💰 Зарплата сотрудника</strong>' +
+        '<div class="filter-bar">' +
+            '<div class="input-field"><label>👤 Сотрудник</label><select id="salaryEmployeeSelect"><option value="">-- Выберите --</option>'+salaryEmpOptions+'</select></div>' +
+            '<div class="input-field"><label>📅 С</label><input type="date" id="salaryStartDate"></div>' +
+            '<div class="input-field"><label>📅 По</label><input type="date" id="salaryEndDate"></div>' +
+            '<button id="calculateSalaryBtn" class="salary-btn">💰 Рассчитать</button>' +
+        '</div>' +
+        '<div id="salaryResult" class="salary-result"><div style="text-align:center;padding:20px;color:#5b6f86;">Выберите сотрудника и период</div></div>' +
+        '</div>' +
+        
+        '<div class="history-section"><strong>🔍 Расширенный фильтр</strong><div class="filter-bar"><div class="input-field"><label>👤 Сотрудник</label><select id="filterEmployeeSelect"><option value="">Все</option>'+allUsers.map(function(p){ return '<option value="'+p.id+'">'+escapeHtml(p.name)+' ('+(p.role==='operator'?'Оператор':'Упаковщица')+')</option>'; }).join('')+'</select></div><div class="input-field"><label>📅 Дата</label><input type="date" id="filterDateInput" value="'+today+'"></div><div class="input-field"><label>🛍️ МП</label><select id="filterMP"><option value="">Все</option>'+uniqueMP.map(function(mp){ return '<option value="'+mp+'">'+mp+'</option>'; }).join('')+'</select></div><div class="input-field"><label>📍 Город/Склад</label><select id="filterCity"><option value="">Все</option>'+uniqueCities.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join('')+'</select></div><div class="input-field"><label>🏷️ Артикул</label><input type="text" id="filterArticle" placeholder="Артикул"></div><button id="applyFilterBtn" type="button">🔍 Показать</button></div><div id="filterResultContainer"><div style="padding:20px;text-align:center;">Выберите параметры фильтра</div></div></div><div class="history-section"><strong>👥 Управление пользователями</strong>' +
             '<div style="overflow-x:auto;"><table><thead><tr><th>Имя</th><th>Логин</th><th>Роль</th><th></th></tr></thead><tbody id="usersTableBody"></tbody></table></div>' +
             '<div id="usersPagination" style="display:flex;gap:6px;justify-content:center;align-items:center;margin-top:12px;flex-wrap:wrap;"></div>' +
         '</div></div></div>';
@@ -506,7 +412,7 @@
         tbody.innerHTML=pageUsers.map(function(e){ return '<tr><td>'+escapeHtml(e.name)+'</td><td>'+escapeHtml(e.login)+'</td><td>'+(e.role==='admin'?'👑 Админ':e.role==='operator'?'🏭 Оператор':'📦 Упаковщица')+'</td><td>'+(e.role!=='admin'?'<button class="delete-user-btn" data-id="'+e.id+'" type="button">🗑️</button>':'—')+'</td></tr>'; }).join('');
         tbody.querySelectorAll(".delete-user-btn").forEach(function(b){ b.onclick=async function(){ if(b.dataset.id&&confirm("Удалить пользователя?")){await deleteUser(b.dataset.id);await loadUsersData();} }; });
         let pHtml='';
-        if(totalPages>1){pHtml='<button class="page-btn" data-upage="1" '+(currentPage===1?'disabled':'')+' type="button">««</button><button class="page-btn" data-upage="'+(currentPage-1)+'" '+(currentPage===1?'disabled':'')+' type="button">«</button><span style="font-size:0.8rem;padding:0 8px;">Стр. '+currentPage+' из '+totalPages+'</span><button class="page-btn" data-upage="'+(currentPage+1)+'" '+(currentPage===totalPages?'disabled':'')+' type="button">»</button><button class="page-btn" data-upage="'+totalPages+'" '+(currentPage===totalPages?'disabled':'')+' type="button">»»</button>';}
+        if(totalPages>1){pHtml='<button class="page-btn" data-upage="1" '+(currentUserPage===1?'disabled':'')+' type="button">««</button><button class="page-btn" data-upage="'+(currentUserPage-1)+'" '+(currentUserPage===1?'disabled':'')+' type="button">«</button><span style="font-size:0.8rem;padding:0 8px;">Стр. '+currentUserPage+' из '+totalPages+'</span><button class="page-btn" data-upage="'+(currentUserPage+1)+'" '+(currentUserPage===totalPages?'disabled':'')+' type="button">»</button><button class="page-btn" data-upage="'+totalPages+'" '+(currentUserPage===totalPages?'disabled':'')+' type="button">»»</button>';}
         pagDiv.innerHTML=pHtml;
         pagDiv.querySelectorAll(".page-btn:not([disabled])").forEach(function(b){ b.onclick=function(){ const page=parseInt(b.dataset.upage); if(page>=1&&page<=totalPages&&page!==currentUserPage){currentUserPage=page;renderUsersPage();} }; });
     }
@@ -531,66 +437,83 @@
     
     function attachUserEvents(){
         const s=getSession();if(!s)return;
-        
-        const logoutBtn = document.getElementById("logoutBtn");
-        if (logoutBtn) { logoutBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); stopScanner(); clearSession(); renderApp(); }; }
-        
-        const changeLocationBtn = document.getElementById("changeLocationBtn");
-        if (changeLocationBtn) { changeLocationBtn.onclick = function() { showLocationModal(s.id, s.name, function() { renderApp(); }); }; }
-        
-        const changeIPBtn = document.getElementById("changeIPBtn");
-        if (changeIPBtn) { changeIPBtn.onclick = async function() { const currentIP = await getUserSavedIP(s.id); showIPModal(s.id, currentIP, function() { renderApp(); }); }; }
-        
-        const scanBtn = document.getElementById('scanBtn');
-        if (scanBtn) { scanBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); if (scanBtn.classList.contains('scanning')) stopScanner(); else startScanner(); }; }
-        
-        const closeScannerBtn = document.getElementById('closeScannerBtn');
-        if (closeScannerBtn) { closeScannerBtn.onclick = function(e) { e.preventDefault(); stopScanner(); }; }
-        
+        const logoutBtn = document.getElementById("logoutBtn"); if (logoutBtn) { logoutBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); stopScanner(); clearSession(); renderApp(); }; }
+        const changeLocationBtn = document.getElementById("changeLocationBtn"); if (changeLocationBtn) { changeLocationBtn.onclick = function() { showLocationModal(s.id, s.name, function() { renderApp(); }); }; }
+        const changeIPBtn = document.getElementById("changeIPBtn"); if (changeIPBtn) { changeIPBtn.onclick = async function() { const currentIP = await getUserSavedIP(s.id); showIPModal(s.id, currentIP, function() { renderApp(); }); }; }
+        const scanBtn = document.getElementById('scanBtn'); if (scanBtn) { scanBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); if (scanBtn.classList.contains('scanning')) stopScanner(); else startScanner(); }; }
+        const closeScannerBtn = document.getElementById('closeScannerBtn'); if (closeScannerBtn) { closeScannerBtn.onclick = function(e) { e.preventDefault(); stopScanner(); }; }
         document.querySelectorAll(".period-btn").forEach(function(b){ b.onclick = async function() { document.querySelectorAll(".period-btn").forEach(function(x){ x.classList.remove("active"); }); b.classList.add("active"); const st = await getUserPeriodStats(s.id, b.dataset.period); const statQty = document.getElementById("statQty"); const statEarned = document.getElementById("statEarned"); if (statQty) statQty.textContent = st.totalQty; if (statEarned) statEarned.textContent = st.totalEarned.toFixed(2); }; });
-        
         const addPackBtn = document.getElementById("addPackBtn");
-        if (addPackBtn) {
-            addPackBtn.onclick = async function() {
-                const art = document.getElementById("articleInput")?.value || "";
-                const qty = document.getElementById("qtyInput")?.value || "";
-                const msg = document.getElementById("msgPanel");
-                const saved = await getUserSavedLocation(s.id);
-                const savedIP = await getUserSavedIP(s.id);
-                if (!saved) { if (msg) msg.innerHTML = '<div class="error-msg" style="display:block;">❌ Выберите склад</div>'; setTimeout(function() { if (msg) msg.innerHTML = ""; }, 2500); return; }
-                const r = await addRecord(art, qty, s.id, s.name, saved.marketplace, saved.locationDisplay, saved.locationRaw, savedIP);
-                if (msg) { msg.innerHTML = r.success ? '<div class="success-msg" style="display:block;">✅ '+(savedIP? savedIP+' | ':'')+saved.marketplace+' | '+art.toUpperCase()+' x '+qty+' шт. | +'+r.earned.toFixed(2)+' руб.</div>' : '<div class="error-msg" style="display:block;">❌ '+r.error+'</div>'; }
-                if (r.success) { playSuccessSound(); document.getElementById("articleInput").value = ""; document.getElementById("qtyInput").value = ""; setTimeout(function() { renderApp(); }, 200); }
-                setTimeout(function() { if (msg) msg.innerHTML = ""; }, 2500);
-            };
-        }
-        
+        if (addPackBtn) { addPackBtn.onclick = async function() { const art = document.getElementById("articleInput")?.value || ""; const qty = document.getElementById("qtyInput")?.value || ""; const msg = document.getElementById("msgPanel"); const saved = await getUserSavedLocation(s.id); const savedIP = await getUserSavedIP(s.id); if (!saved) { if (msg) msg.innerHTML = '<div class="error-msg" style="display:block;">❌ Выберите склад</div>'; setTimeout(function() { if (msg) msg.innerHTML = ""; }, 2500); return; } const r = await addRecord(art, qty, s.id, s.name, saved.marketplace, saved.locationDisplay, saved.locationRaw, savedIP); if (msg) { msg.innerHTML = r.success ? '<div class="success-msg" style="display:block;">✅ '+(savedIP? savedIP+' | ':'')+saved.marketplace+' | '+art.toUpperCase()+' x '+qty+' шт. | +'+r.earned.toFixed(2)+' руб.</div>' : '<div class="error-msg" style="display:block;">❌ '+r.error+'</div>'; } if (r.success) { playSuccessSound(); document.getElementById("articleInput").value = ""; document.getElementById("qtyInput").value = ""; setTimeout(function() { renderApp(); }, 200); } setTimeout(function() { if (msg) msg.innerHTML = ""; }, 2500); }; }
         const articleInput = document.getElementById("articleInput"); const qtyInput = document.getElementById("qtyInput");
         if (articleInput) { articleInput.addEventListener("keypress", function(e) { if (e.key === "Enter") { e.preventDefault(); if (qtyInput) qtyInput.focus(); } }); }
         if (qtyInput) { qtyInput.addEventListener("keypress", function(e) { if (e.key === "Enter") { e.preventDefault(); if (addPackBtn) addPackBtn.click(); } }); }
     }
     
     function attachAdminEvents(){
-        const logoutBtn = document.getElementById("logoutBtn");
-        if (logoutBtn) { logoutBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); stopScanner(); clearSession(); renderApp(); }; }
+        const logoutBtn = document.getElementById("logoutBtn"); if (logoutBtn) { logoutBtn.onclick = function(e) { e.preventDefault(); e.stopPropagation(); stopScanner(); clearSession(); renderApp(); }; }
+        const adminExportBtn = document.getElementById('adminExportBtn'); if (adminExportBtn) { adminExportBtn.onclick = async function() { const all = await db.collection('pack_records').orderBy('timestamp','desc').limit(2000).get(); const records = all.docs.map(function(d) { return { id: d.id, ...d.data() }; }); exportToExcel(records, 'Все_записи'); }; }
         
-        const adminExportBtn = document.getElementById('adminExportBtn');
-        if (adminExportBtn) { adminExportBtn.onclick = async function() { const all = await db.collection('pack_records').orderBy('timestamp','desc').limit(2000).get(); const records = all.docs.map(function(d) { return { id: d.id, ...d.data() }; }); exportToExcel(records, 'Все_записи'); }; }
+        // Кнопка расчёта зарплаты
+        const calcSalaryBtn = document.getElementById('calculateSalaryBtn');
+        if (calcSalaryBtn) {
+            calcSalaryBtn.onclick = async function() {
+                var empId = document.getElementById('salaryEmployeeSelect')?.value;
+                var startDate = document.getElementById('salaryStartDate')?.value;
+                var endDate = document.getElementById('salaryEndDate')?.value;
+                var container = document.getElementById('salaryResult');
+                
+                if (!empId) { alert('Выберите сотрудника'); return; }
+                if (!startDate || !endDate) { alert('Выберите период'); return; }
+                
+                container.innerHTML = '<div style="text-align:center;padding:20px;">Загрузка...</div>';
+                
+                try {
+                    var emp = employees.find(function(e) { return e.id === empId; });
+                    var data = await calculateSalary(empId, startDate, endDate);
+                    
+                    var html = '<div style="margin-bottom:12px;"><strong>'+escapeHtml(emp?.name || 'Сотрудник')+'</strong> | '+formatDateForDisplay(startDate)+' — '+formatDateForDisplay(endDate)+'</div>';
+                    
+                    // Общие итоги
+                    html += '<div class="salary-row salary-total"><span>📦 Всего упаковано</span><span>'+data.totalQty+' шт.</span></div>';
+                    html += '<div class="salary-row salary-total"><span>💰 Всего заработано</span><span>'+data.totalEarned.toFixed(2)+' ₽</span></div>';
+                    html += '<div class="salary-row salary-total"><span>📅 Отработано дней</span><span>'+data.daysWorked+' дн.</span></div>';
+                    
+                    // По ИП
+                    if (Object.keys(data.byIP).length > 0) {
+                        html += '<div style="margin-top:12px;font-weight:700;font-size:0.85rem;">По ИП:</div>';
+                        Object.keys(data.byIP).forEach(function(ip) {
+                            html += '<div class="salary-row"><span>'+escapeHtml(ip)+'</span><span>'+data.byIP[ip].qty+' шт. | '+data.byIP[ip].earned.toFixed(2)+' ₽</span></div>';
+                        });
+                    }
+                    
+                    // По маркетплейсу
+                    if (Object.keys(data.byMP).length > 0) {
+                        html += '<div style="margin-top:12px;font-weight:700;font-size:0.85rem;">По маркетплейсу:</div>';
+                        Object.keys(data.byMP).forEach(function(mp) {
+                            html += '<div class="salary-row"><span>'+escapeHtml(mp)+'</span><span>'+data.byMP[mp].qty+' шт. | '+data.byMP[mp].earned.toFixed(2)+' ₽</span></div>';
+                        });
+                    }
+                    
+                    container.innerHTML = html;
+                } catch (error) {
+                    console.error('Salary calc error:', error);
+                    container.innerHTML = '<div style="text-align:center;padding:20px;color:#b13e24;">Ошибка расчёта</div>';
+                }
+            };
+        }
         
         let currentPage=1,allFilteredRecords=[];const PER_PAGE=25;
-        const applyFilterBtn = document.getElementById("applyFilterBtn");
-        if (applyFilterBtn) { applyFilterBtn.onclick = async function() { currentPage = 1; await loadFilteredData(); }; }
+        const applyFilterBtn = document.getElementById("applyFilterBtn"); if (applyFilterBtn) { applyFilterBtn.onclick = async function() { currentPage = 1; await loadFilteredData(); }; }
         
         async function loadFilteredData(){
             const eid=document.getElementById("filterEmployeeSelect")?.value,date=document.getElementById("filterDateInput")?.value,mp=document.getElementById("filterMP")?.value,city=document.getElementById("filterCity")?.value,article=document.getElementById("filterArticle")?.value.trim().toUpperCase(),container=document.getElementById("filterResultContainer");
             let query=db.collection('pack_records');if(eid) query=query.where('userId','==',eid);if(date) query=query.where('dateOnly','==',date);if(mp&&date) query=query.where('marketplace','==',mp);if(city&&date) query=query.where('locationDisplay','==',city);
-            container.innerHTML='<div style="text-align:center;padding:20px;">Загрузка...</div>';
-            let snap;try{snap=await query.orderBy('timestamp','desc').limit(500).get();}catch(e){snap=await query.limit(500).get();}
+            container.innerHTML='<div style="text-align:center;padding:20px;">Загрузка...</div>';let snap;try{snap=await query.orderBy('timestamp','desc').limit(500).get();}catch(e){snap=await query.limit(500).get();}
             if(snap.empty){container.innerHTML='<div style="text-align:center;padding:20px;">📭 Ничего не найдено</div>';return;}
             let records=snap.docs.map(function(d){ return {id:d.id,...d.data()}; });if(mp&&!date) records=records.filter(function(r){ return r.marketplace===mp; });if(city&&!date) records=records.filter(function(r){ return r.locationDisplay===city; });if(article) records=records.filter(function(r){ return r.article&&r.article.includes(article); });
             records.sort(function(a,b){ const ta=a.timestamp?.toDate?a.timestamp.toDate():new Date(a.timestamp||0);const tb=b.timestamp?.toDate?b.timestamp.toDate():new Date(b.timestamp||0);return tb-ta; });
-            if(records.length===0){container.innerHTML='<div style="text-align:center;padding:20px;">📭 Ничего не найдено</div>';return;}
-            allFilteredRecords=records;renderPage(container);
+            if(records.length===0){container.innerHTML='<div style="text-align:center;padding:20px;">📭 Ничего не найдено</div>';return;}allFilteredRecords=records;renderPage(container);
         }
         
         function renderPage(container){
@@ -600,10 +523,11 @@
             container.innerHTML='<div class="summary-card"><span>📦 <strong>'+tq+' шт.</strong></span><span>💰 <strong>'+te.toFixed(2)+' руб.</strong></span><span>📋 Всего: '+allFilteredRecords.length+'</span><span>👥 Сотрудников: '+new Set(allFilteredRecords.map(function(r){ return r.userId; })).size+'</span>'+(totalPages>1?'<span>📄 Стр. '+currentPage+'/'+totalPages+'</span>':'')+'<button id="exportFilteredBtn" class="page-btn" style="margin-left:auto;" type="button">📥 Экспорт</button></div><div style="overflow-x:auto;"><table><thead><tr><th>ИП</th><th>МП</th><th>Склад</th><th>Артикул</th><th>Кол-во</th><th>₽</th><th>Сотрудник</th><th></th></tr></thead><tbody>'+pageRecords.map(function(r){ return '<tr><td>'+(r.ip?'<span class="ip-badge ip-'+r.ip+'">'+r.ip+'</span>':'—')+'</td><td><span class="marketplace-badge '+(r.marketplace==='WB'?'badge-wb':'badge-ozon')+'">'+r.marketplace+'</span></td><td>'+escapeHtml(r.locationDisplay||'—')+'</td><td><strong>'+escapeHtml(r.article)+'</strong></td><td>'+r.quantity+'</td><td>'+((r.earned||0).toFixed(2))+'</td><td>'+escapeHtml(r.userName)+'</td><td><button class="adminDelBtn" data-id="'+r.id+'" type="button">🗑️</button></td></tr>'; }).join('')+'</tbody></table></div>'+pHtml;
             container.querySelectorAll(".adminDelBtn").forEach(function(b){ b.onclick=async function(){ if(b.dataset.id&&confirm("Удалить запись?")){await deleteRecord(b.dataset.id);allFilteredRecords=allFilteredRecords.filter(function(r){ return r.id!==b.dataset.id; });const tp=Math.ceil(allFilteredRecords.length/PER_PAGE);if(currentPage>tp) currentPage=Math.max(1,tp);renderPage(container);} }; });
             container.querySelectorAll(".page-btn:not([disabled])").forEach(function(b){ b.onclick=function(){ const page=parseInt(b.dataset.page); if(page>=1&&page<=totalPages&&page!==currentPage){currentPage=page;renderPage(container);} }; });
-            const exportFilteredBtn = container.querySelector('#exportFilteredBtn');
-            if (exportFilteredBtn) { exportFilteredBtn.onclick = function() { exportToExcel(allFilteredRecords, 'Отфильтрованные_записи'); }; }
+            const exportFilteredBtn = container.querySelector('#exportFilteredBtn'); if (exportFilteredBtn) { exportFilteredBtn.onclick = function() { exportToExcel(allFilteredRecords, 'Отфильтрованные_записи'); }; }
         }
     }
+    
+    function formatDateForDisplay(s) { if(!s) return '—'; var p = s.split('-'); return p[2]+'.'+p[1]+'.'+p[0]; }
     
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape') stopScanner(); });
     window.addEventListener("DOMContentLoaded", function() { renderApp(); });

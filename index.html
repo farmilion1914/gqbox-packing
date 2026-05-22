@@ -152,7 +152,7 @@
     
     // ============ PWA Service Worker ============
     if ('serviceWorker' in navigator) {
-        var swCode = "const CACHE_NAME='gqbox-packer-v6';const ASSETS=['./','https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js'];self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE_NAME).then(function(c){return c.addAll(ASSETS).catch(function(){})}));self.skipWaiting()});self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE_NAME}).map(function(k){return caches.delete(k)}))}));self.clients.claim()});self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(function(cached){var fetched=fetch(e.request).then(function(response){if(response&&response.status===200){var clone=response.clone();caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,clone)})}return response}).catch(function(){return cached});return cached||fetched}))});";
+        var swCode = "const CACHE_NAME='gqbox-packer-v7';const ASSETS=['./','https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js'];self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE_NAME).then(function(c){return c.addAll(ASSETS).catch(function(){})}));self.skipWaiting()});self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE_NAME}).map(function(k){return caches.delete(k)}))}));self.clients.claim()});self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(function(cached){var fetched=fetch(e.request).then(function(response){if(response&&response.status===200){var clone=response.clone();caches.open(CACHE_NAME).then(function(cache){cache.put(e.request,clone)})}return response}).catch(function(){return cached});return cached||fetched}))});";
         var swBlob = new Blob([swCode], { type: 'application/javascript' });
         var swUrl = URL.createObjectURL(swBlob);
         navigator.serviceWorker.register(swUrl).then(function(){}).catch(function(){});
@@ -251,18 +251,20 @@
     async function getYesterdayRecords(){ const y=new Date(); y.setDate(y.getDate()-1); const ds=y.toISOString().slice(0,10); const s=await db.collection('pack_records').where('dateOnly','==',ds).get(); return { records: s.docs.map(function(d){ return {id:d.id,...d.data()}; }), date:ds }; }
     async function deleteRecord(rid){ await db.collection('pack_records').doc(rid).delete(); }
     
-    // ============ Расчёт зарплаты ============
+    // ============ Расчёт зарплаты (упрощённый) ============
     async function calculateSalary(uid, startDate, endDate) {
         var q = db.collection('pack_records').where('userId','==',uid).where('dateOnly','>=',startDate).where('dateOnly','<=',endDate);
         var snapshot = await q.orderBy('dateOnly').get();
         var records = snapshot.docs.map(function(d) { return { id: d.id, ...d.data() }; });
-        var byDay = {}, byIP = {}, byMP = {};
+        var byDay = {};
         records.forEach(function(r) {
-            var day = r.dateOnly; if (!byDay[day]) byDay[day] = { qty: 0, earned: 0 }; byDay[day].qty += r.quantity; byDay[day].earned += r.earned || 0;
-            var ip = r.ip || 'Без ИП'; if (!byIP[ip]) byIP[ip] = { qty: 0, earned: 0 }; byIP[ip].qty += r.quantity; byIP[ip].earned += r.earned || 0;
-            var mp = r.marketplace || '—'; if (!byMP[mp]) byMP[mp] = { qty: 0, earned: 0 }; byMP[mp].qty += r.quantity; byMP[mp].earned += r.earned || 0;
+            var day = r.dateOnly; if (!byDay[day]) byDay[day] = true;
         });
-        return { records: records, byDay: byDay, byIP: byIP, byMP: byMP, totalQty: records.reduce(function(s,r){ return s + r.quantity; }, 0), totalEarned: records.reduce(function(s,r){ return s + (r.earned || 0); }, 0), daysWorked: Object.keys(byDay).length, startDate: startDate, endDate: endDate };
+        return {
+            totalQty: records.reduce(function(s,r){ return s + r.quantity; }, 0),
+            totalEarned: records.reduce(function(s,r){ return s + (r.earned || 0); }, 0),
+            daysWorked: Object.keys(byDay).length
+        };
     }
     
     const SESSION_KEY="gqbox_session";
@@ -424,14 +426,6 @@
                     html += '<div class="salary-row salary-total"><span>📦 Всего упаковано</span><span>'+data.totalQty+' шт.</span></div>';
                     html += '<div class="salary-row salary-total"><span>💰 Всего заработано</span><span>'+data.totalEarned.toFixed(2)+' ₽</span></div>';
                     html += '<div class="salary-row salary-total"><span>📅 Отработано дней</span><span>'+data.daysWorked+' дн.</span></div>';
-                    if (Object.keys(data.byIP).length > 0) {
-                        html += '<div style="margin-top:12px;font-weight:700;font-size:0.85rem;">По ИП:</div>';
-                        Object.keys(data.byIP).forEach(function(ip) { html += '<div class="salary-row"><span>'+escapeHtml(ip)+'</span><span>'+data.byIP[ip].qty+' шт. | '+data.byIP[ip].earned.toFixed(2)+' ₽</span></div>'; });
-                    }
-                    if (Object.keys(data.byMP).length > 0) {
-                        html += '<div style="margin-top:12px;font-weight:700;font-size:0.85rem;">По маркетплейсу:</div>';
-                        Object.keys(data.byMP).forEach(function(mp) { html += '<div class="salary-row"><span>'+escapeHtml(mp)+'</span><span>'+data.byMP[mp].qty+' шт. | '+data.byMP[mp].earned.toFixed(2)+' ₽</span></div>'; });
-                    }
                     container.innerHTML = html;
                 } catch (error) { console.error('Salary calc error:', error); container.innerHTML = '<div style="text-align:center;padding:20px;color:#b13e24;">Ошибка расчёта: '+error.message+'</div>'; }
             };
